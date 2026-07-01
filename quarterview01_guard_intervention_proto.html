@@ -2,21 +2,21 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>GUARD SEED — Quarterview R&amp;D 01</title>
 <!--
-  Guard Seed × Quarterview R&D 01 (pass 01A) — quarterview01_guard_intervention_proto.html
-  New file. C7 (seed02c7_triple_guard_finish_polish.html) is reference-only and NOT touched.
-  Loop: Title(key art) → 3-front observe (battlefield-first, no system panel)
-        → tap select / re-tap dive → shield intervention (ME only, tap-timing Guard/Parry/Miss,
-        central convergence) → result returns to the SELECTED front → boss omen(key art).
+  Guard Seed × Quarterview R&D 01 (pass 01C) — quarterview01_guard_intervention_proto.html
+  C7 (seed02c7_triple_guard_finish_polish.html) is reference-only and NOT touched.
+  Loop: Title(key art, STILL) → 3-front observe (mobile-fixed, no scroll, no system panel)
+        → tap select / re-tap dive → shield intervention (ME only, tap-timing Guard/Parry/Miss)
+        → PARRY → "CHANCE!" fever mash → result returns to the SELECTED front → boss omen(key art).
+  01C adds: mobile 100dvh fit + scroll lock, foe layer/count/size cleanup, priest visibility,
+            FEEL Dev panel (⚙, session-only sliders), Parry Fever prototype.
   Bodies via assets/qv01/ (relative PNG, incl. sheet-extracted idle/act frames). FX = CSS/SVG.
   No external CDN/URL/library.
 -->
 <style>
   :root{
-    --stage-w: 390px;
-    --stage-h: 844px;
     --gold:#e7c15a; --gold-soft:#c9a94a;
     --cyan:#7fe3ff; --cyan-hot:#c9f6ff;
     --hp1:#4fd18a; --hp2:#2f9d6a;
@@ -25,31 +25,33 @@
     --txt:#e9edf6; --txt-dim:#9aa4bd;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;height:100%;background:#05060a;color:var(--txt);
-    font-family:"Segoe UI",-apple-system,"Malgun Gothic",system-ui,sans-serif;}
-  body{display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:auto;}
+  /* 01C: lock the page to the viewport — no body scroll / rubber-band / swipe-slide */
+  html,body{margin:0;height:100%;background:#05060a;color:var(--txt);overflow:hidden;
+    overscroll-behavior:none;font-family:"Segoe UI",-apple-system,"Malgun Gothic",system-ui,sans-serif;}
+  body{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;touch-action:none;}
 
-  #stage{position:relative; width:var(--stage-w); height:var(--stage-h);
-    max-width:100vw; overflow:hidden; background:#05060a; border-radius:18px;
-    box-shadow:0 24px 70px rgba(0,0,0,.7), 0 0 0 1px #000; user-select:none;}
+  /* 01C: stage fills the phone screen height exactly (dvh + --vh fallback), fixed */
+  #stage{position:relative; width:min(100vw,430px);
+    height:calc(var(--vh,1vh) * 100); height:100dvh; max-height:100dvh;
+    overflow:hidden; background:#05060a; user-select:none; touch-action:manipulation;
+    --shk:0.85;}
 
   .screen{position:absolute; inset:0; display:none; flex-direction:column;}
   .screen.active{display:flex;}
 
-  /* ===================== TITLE (key art) ===================== */
+  /* ===================== TITLE (key art — STILL, no zoom) ===================== */
   #s-title{cursor:pointer;
     background:center/cover no-repeat url('assets/qv01/ui/guardseed_title.png');
-    background-color:#05060a; animation:titleBreathe 7s ease-in-out infinite;}
-  @keyframes titleBreathe{0%,100%{background-size:cover}50%{background-size:112%}}
-  .title-tap{position:absolute;left:0;right:0;bottom:96px;z-index:3;text-align:center;
+    background-color:#05060a;}
+  .title-tap{position:absolute;left:0;right:0;bottom:9%;z-index:3;text-align:center;
     font-size:11px;letter-spacing:.34em;color:#ffe9b8;text-transform:uppercase;
     text-shadow:0 0 12px rgba(231,193,90,.7),0 2px 4px #000;pointer-events:none;
-    animation:tapPulse 1.5s ease-in-out infinite;}
-  @keyframes tapPulse{0%,100%{opacity:.35;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
-  .title-glow{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);z-index:2;
-    width:260px;height:120px;pointer-events:none;
-    background:radial-gradient(50% 60% at 50% 50%,rgba(231,193,90,.28),transparent 70%);
-    animation:tapPulse 1.5s ease-in-out infinite;}
+    animation:tapFade 1.6s ease-in-out infinite;}
+  @keyframes tapFade{0%,100%{opacity:.4}50%{opacity:1}}   /* opacity only — no scale/translate */
+  .title-glow{position:absolute;left:50%;bottom:5%;transform:translateX(-50%);z-index:2;
+    width:260px;height:110px;pointer-events:none;
+    background:radial-gradient(50% 60% at 50% 50%,rgba(231,193,90,.26),transparent 70%);
+    animation:tapFade 1.6s ease-in-out infinite;}
 
   /* ===================== OBSERVE (battlefield-first) ===================== */
   #s-observe{background:#070911;}
@@ -69,8 +71,7 @@
   .omen-bar span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     font-size:8px;letter-spacing:.24em;color:#ffd7d7;text-shadow:0 1px 2px #000;font-weight:700;}
 
-  /* lanes fill everything below the topbar -> screen bottom is battlefield, no panel */
-  .lanes{flex:1 1 auto;display:flex;flex-direction:column;gap:2px;overflow:hidden;}
+  .lanes{flex:1 1 auto;display:flex;flex-direction:column;gap:2px;overflow:hidden;min-height:0;}
   .lane{position:relative;flex:1 1 0;min-height:0;overflow:hidden;cursor:pointer;
     border-top:1px solid rgba(0,0,0,.5);transition:transform .1s;}
   .lane:active{transform:scale(.995);}
@@ -79,24 +80,24 @@
     background:linear-gradient(180deg,rgba(6,8,14,.12),rgba(6,8,14,.03) 40%,rgba(6,8,14,.66));}
   .lane-actors{position:absolute;inset:0;}
   .actor{position:absolute;bottom:2%;filter:drop-shadow(0 6px 6px rgba(0,0,0,.55));
-    transform-origin:bottom center;pointer-events:none;height:64%;}
-  .actor.ally{left:4%;}
-  .actor.ally.back{left:19%;height:56%;z-index:2;opacity:.95;}
+    transform-origin:bottom center;pointer-events:none;height:60%;}
+  .actor.ally{left:4%;z-index:3;}
+  .actor.ally.a-front{animation:bobA 2.7s ease-in-out infinite;}
+  /* 01C: back ally (e.g. priest) pulled aside + up + a touch bigger so it isn't buried behind the warrior */
+  .actor.ally.back{left:25%;bottom:7%;height:57%;z-index:2;opacity:.97;animation:bobA 3.1s ease-in-out infinite .5s;}
   .actor.foe{transform:scaleX(-1);}
-  .actor.foe.back{z-index:2;opacity:.95;}
-  .actor.a-front{z-index:3;animation:bobA 2.7s ease-in-out infinite;}
-  .actor.f-front{z-index:3;animation:bobB 2.5s ease-in-out infinite;}
+  .actor.foe.fb0{animation:bobB 2.6s ease-in-out infinite;}
+  .actor.foe.fb1{animation:bobB 2.95s ease-in-out infinite;}
+  .actor.foe.fb2{animation:bobB 3.25s ease-in-out infinite;}
   @keyframes bobA{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
   @keyframes bobB{0%,100%{transform:scaleX(-1) translateY(0)}50%{transform:scaleX(-1) translateY(-2px)}}
   .actor.ally.lunge{animation:lungeA .32s ease-out;}
   @keyframes lungeA{0%{transform:translateX(0)}42%{transform:translateX(15px)}100%{transform:translateX(0)}}
-  .actor.foe.lunge{animation:lungeB .32s ease-out;}
+  .actor.foe.lunge{animation:lungeB .32s ease-out;}   /* after fbN → overrides bob during lunge */
   @keyframes lungeB{0%{transform:scaleX(-1) translateX(0)}42%{transform:scaleX(-1) translateX(15px)}100%{transform:scaleX(-1) translateX(0)}}
   .actor.hitflash{animation:hitflash .3s ease-out;}
   @keyframes hitflash{0%,100%{filter:drop-shadow(0 6px 6px rgba(0,0,0,.55))}
     35%{filter:drop-shadow(0 6px 6px rgba(0,0,0,.55)) brightness(2.4) saturate(.4)}}
-  .actor.recoil{animation:recoil .3s ease-out;}
-  @keyframes recoil{0%,100%{}40%{filter:drop-shadow(0 6px 6px rgba(0,0,0,.55)) brightness(1.6);}}
 
   .lane-top{position:absolute;top:0;left:0;right:0;padding:6px 8px;display:flex;
     align-items:flex-start;justify-content:space-between;z-index:5;}
@@ -125,7 +126,6 @@
     border:2px solid var(--gold);box-shadow:inset 0 0 22px rgba(231,193,90,.3);}
   .lane.selected .sel-ring{opacity:1;animation:selRing 1.5s ease-in-out infinite;}
   @keyframes selRing{0%,100%{box-shadow:inset 0 0 14px rgba(231,193,90,.24)}50%{box-shadow:inset 0 0 32px rgba(231,193,90,.55)}}
-  /* diegetic dive hint on the selected lane (not a system panel) */
   .dive-hint{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);z-index:7;opacity:0;
     padding:5px 13px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.06em;
     color:#22190a;background:linear-gradient(180deg,#f7e4a4,#e7c15a);white-space:nowrap;
@@ -140,9 +140,9 @@
   @keyframes laneShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}60%{transform:translateX(3px)}}
 
   .lane-burst{position:absolute;inset:0;z-index:8;pointer-events:none;display:flex;align-items:center;justify-content:center;opacity:0;}
-  .lane-burst.show{animation:burst 1.15s ease-out;}
+  .lane-burst.show{animation:burst 1.2s ease-out;}
   @keyframes burst{0%{opacity:0;transform:scale(.6)}18%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.12)}}
-  .lane-burst b{font-size:24px;font-weight:900;text-shadow:0 2px 10px #000;}
+  .lane-burst b{font-size:23px;font-weight:900;text-shadow:0 2px 10px #000;text-align:center;}
   .lane-burst.parry b{color:var(--cyan-hot);text-shadow:0 0 18px var(--cyan),0 2px 6px #000;}
   .lane-burst.guard b{color:#ffe1a8;text-shadow:0 0 16px #d9a53e,0 2px 6px #000;}
   .lane-burst.miss b{color:#ff8b7e;text-shadow:0 0 16px #e5473f,0 2px 6px #000;}
@@ -158,18 +158,19 @@
   .iv-top .lane-name{font-size:14px;}
   .iv-mini-g{margin-top:8px;display:flex;flex-direction:column;gap:5px;}
 
-  /* 01B: ME pushed to the bottom — "아래에서 버티고 막는 주인공" (clears the convergence UI) */
   .iv-player{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);height:45%;z-index:5;
     filter:drop-shadow(0 12px 14px rgba(0,0,0,.65));transition:transform .16s;}
   .iv-player.hurt{animation:plHurt .42s ease-out;}
   @keyframes plHurt{0%,100%{transform:translateX(-50%)}30%{transform:translateX(calc(-50% - 12px)) rotate(-3deg)}}
   .iv-player.brace{animation:plBrace .4s ease-out;}
   @keyframes plBrace{0%,100%{transform:translateX(-50%)}40%{transform:translateX(-50%) scale(1.04)}}
+  .iv-player.fever{animation:feverIdle .5s ease-in-out infinite;}
+  @keyframes feverIdle{0%,100%{transform:translateX(-50%) rotate(-1.5deg)}50%{transform:translateX(-50%) rotate(1.5deg)}}
+  .iv-player.swing{animation:feverSwing .16s ease-out;}
+  @keyframes feverSwing{0%{transform:translateX(-50%) scale(1)}45%{transform:translateX(-50%) scale(1.07) rotate(2deg)}100%{transform:translateX(-50%) scale(1)}}
 
-  /* convergence ring — the incoming threat collapsing onto ME */
-  /* 01B: convergence UI raised to the upper-middle (~2/3 up the screen), above ME */
   .ring-hub{position:absolute;left:50%;top:33%;transform:translate(-50%,-50%);z-index:4;
-    width:260px;height:260px;pointer-events:none;}
+    width:260px;height:260px;pointer-events:none;transition:opacity .2s;}
   .ring-guard,.ring-target,.beat-ring{position:absolute;left:50%;top:50%;border-radius:50%;transform:translate(-50%,-50%);}
   .ring-guard{width:190px;height:190px;border:2px dashed rgba(150,175,215,.35);}
   .ring-target{width:120px;height:120px;border:3px solid rgba(231,225,168,.65);
@@ -181,7 +182,8 @@
   .ring-core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;
     background:radial-gradient(circle,#fff,#7fe3ff);box-shadow:0 0 16px var(--cyan);}
   .beat-count{position:absolute;left:50%;top:calc(33% + 132px);transform:translateX(-50%);z-index:6;
-    font-size:11px;letter-spacing:.2em;color:#cfe8ff;font-weight:700;text-shadow:0 1px 4px #000;}
+    font-size:11px;letter-spacing:.2em;color:#cfe8ff;font-weight:700;text-shadow:0 1px 4px #000;transition:opacity .2s;}
+  #s-intervene.fever-on .ring-hub, #s-intervene.fever-on #beat-count{opacity:0;}
 
   .iv-callout{position:absolute;left:50%;top:20%;transform:translate(-50%,-50%);z-index:8;
     font-size:42px;font-weight:900;pointer-events:none;opacity:0;text-align:center;}
@@ -202,47 +204,91 @@
   @keyframes flashFire{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
 
   .iv-hint{position:absolute;bottom:15px;left:0;right:0;z-index:8;text-align:center;
-    font-size:13px;color:#dbe6fb;letter-spacing:.04em;pointer-events:none;
-    text-shadow:0 1px 6px #000;}
+    font-size:13px;color:#dbe6fb;letter-spacing:.04em;pointer-events:none;text-shadow:0 1px 6px #000;}
   .iv-hint b{color:var(--cyan);}
   .iv-hint.beat{animation:hintPulse 1s ease-in-out infinite;}
   @keyframes hintPulse{0%,100%{opacity:.7}50%{opacity:1}}
 
+  /* ---- Parry Fever ("나의 찬스다!") ---- */
+  #fever{position:absolute;inset:0;z-index:9;display:none;pointer-events:none;}
+  #fever.show{display:block;}
+  .fever-veil{position:absolute;inset:0;
+    background:radial-gradient(72% 62% at 50% 56%,rgba(255,240,180,.30),rgba(127,227,255,.15) 45%,transparent 76%);
+    animation:feverVeil .5s ease-in-out infinite;}
+  @keyframes feverVeil{0%,100%{opacity:.7}50%{opacity:1}}
+  .fever-rays{position:absolute;inset:0;
+    background:repeating-conic-gradient(from 0deg at 50% 46%,rgba(255,255,255,.05) 0deg 6deg,transparent 6deg 14deg);
+    animation:feverRays 6s linear infinite;}
+  @keyframes feverRays{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+  .fever-title{position:absolute;left:0;right:0;top:14%;text-align:center;z-index:2;
+    font-size:32px;font-weight:900;color:#fff;
+    text-shadow:0 0 22px var(--cyan),0 0 10px #ffe9b8,0 2px 6px #000;
+    animation:feverTitle .4s ease-in-out infinite;}
+  @keyframes feverTitle{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+  .fever-count{position:absolute;left:0;right:0;top:25%;text-align:center;z-index:2;
+    font-size:17px;font-weight:800;letter-spacing:.14em;color:var(--cyan-hot);text-shadow:0 0 12px var(--cyan),0 2px 4px #000;}
+  .fever-bar-wrap{position:absolute;left:16%;right:16%;top:calc(25% + 32px);height:8px;border-radius:6px;
+    background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.22);overflow:hidden;z-index:2;}
+  .fever-bar{position:absolute;left:0;top:0;bottom:0;width:100%;
+    background:linear-gradient(90deg,#ffe9b8,#7fe3ff);}
+
   #stage.shake{animation:stageShake .32s ease-in-out;}
-  @keyframes stageShake{0%,100%{transform:translate(0,0)}20%{transform:translate(-5px,3px)}45%{transform:translate(4px,-3px)}70%{transform:translate(-3px,2px)}}
+  @keyframes stageShake{0%,100%{transform:translate(0,0)}
+    20%{transform:translate(calc(-5px*var(--shk)),calc(3px*var(--shk)))}
+    45%{transform:translate(calc(4px*var(--shk)),calc(-3px*var(--shk)))}
+    70%{transform:translate(calc(-3px*var(--shk)),calc(2px*var(--shk)))}}
   #stage.shake-hard{animation:stageShakeHard .5s ease-in-out;}
-  @keyframes stageShakeHard{0%,100%{transform:translate(0,0)}15%{transform:translate(-9px,5px)}35%{transform:translate(8px,-5px)}55%{transform:translate(-7px,4px)}80%{transform:translate(5px,-3px)}}
+  @keyframes stageShakeHard{0%,100%{transform:translate(0,0)}
+    15%{transform:translate(calc(-9px*var(--shk)),calc(5px*var(--shk)))}
+    35%{transform:translate(calc(8px*var(--shk)),calc(-5px*var(--shk)))}
+    55%{transform:translate(calc(-7px*var(--shk)),calc(4px*var(--shk)))}
+    80%{transform:translate(calc(5px*var(--shk)),calc(-3px*var(--shk)))}}
 
   /* ===================== BOSS OMEN (key art) ===================== */
-  #omen-overlay{position:absolute;inset:0;z-index:40;display:none;align-items:flex-end;justify-content:center;
-    background:#04040a;}
+  #omen-overlay{position:absolute;inset:0;z-index:40;display:none;align-items:flex-end;justify-content:center;background:#04040a;}
   #omen-overlay.show{display:flex;animation:omenIn .9s ease-out;}
   @keyframes omenIn{0%{opacity:0}100%{opacity:1}}
-  .omen-art{position:absolute;inset:0;background:center/cover no-repeat url('assets/qv01/ui/guardseed_boss.png');
-    animation:omenArt 3.6s ease-in-out infinite;}
-  @keyframes omenArt{0%,100%{transform:scale(1.02)}50%{transform:scale(1.06)}}
+  .omen-art{position:absolute;inset:0;background:center/cover no-repeat url('assets/qv01/ui/guardseed_boss.png');}
   .omen-red{position:absolute;inset:0;pointer-events:none;
     background:radial-gradient(80% 60% at 50% 45%,transparent 40%,rgba(120,0,0,.5) 100%);
     animation:omenRed 1.4s ease-in-out infinite;}
   @keyframes omenRed{0%,100%{opacity:.55}50%{opacity:1}}
   .omen-scan{position:absolute;inset:0;pointer-events:none;
-    background:repeating-linear-gradient(180deg,rgba(255,0,0,.05) 0 2px,transparent 2px 5px);
-    animation:omenShake 2.2s ease-in-out infinite;}
-  @keyframes omenShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
-  .omen-next{position:relative;z-index:5;margin-bottom:70px;text-align:center;}
+    background:repeating-linear-gradient(180deg,rgba(255,0,0,.05) 0 2px,transparent 2px 5px);}
+  .omen-next{position:relative;z-index:5;margin-bottom:9%;text-align:center;}
   .omen-next span{display:block;font-size:10px;letter-spacing:.2em;color:#ff9a9a;text-transform:uppercase;
-    margin-bottom:12px;text-shadow:0 2px 6px #000;animation:tapPulse 1.6s ease-in-out infinite;}
+    margin-bottom:12px;text-shadow:0 2px 6px #000;animation:tapFade 1.6s ease-in-out infinite;}
   .btn-omen{padding:13px 40px;border:1px solid #ff5442;border-radius:40px;background:rgba(60,10,12,.7);
     color:#ffdada;font-weight:800;letter-spacing:.2em;font-size:12px;cursor:pointer;
     box-shadow:0 0 20px rgba(255,84,66,.35);backdrop-filter:blur(2px);}
 
-  .fab-wrap{position:absolute;top:8px;right:8px;z-index:50;display:flex;gap:6px;}
+  /* ===================== FAB + DEV PANEL ===================== */
+  .fab-wrap{position:absolute;top:8px;right:8px;z-index:50;display:none;gap:6px;}
   .fab{width:28px;height:28px;border-radius:50%;border:1px solid rgba(60,70,110,.6);
     background:rgba(20,24,39,.8);color:#aeb7d0;font-size:12px;cursor:pointer;
     display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
   .fab:active{transform:scale(.9);}
   .fab.dbg{font-size:8.5px;width:auto;padding:0 8px;border-radius:16px;}
-  .fab-wrap{display:none;}   /* revealed by showScreen for observe/intervene; hidden on key-art title */
+  .fab.gear{color:#cfe8ff;border-color:rgba(127,227,255,.4);}
+
+  #dev-panel{position:absolute;top:42px;right:8px;z-index:60;width:236px;display:none;
+    background:rgba(12,16,27,.96);border:1px solid rgba(90,110,160,.5);border-radius:12px;
+    box-shadow:0 12px 40px rgba(0,0,0,.7);backdrop-filter:blur(4px);overflow:hidden;}
+  #dev-panel.show{display:block;}
+  .dev-head{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;
+    font-size:11px;letter-spacing:.16em;font-weight:800;color:var(--cyan);
+    border-bottom:1px solid rgba(90,110,160,.35);background:rgba(20,26,45,.7);}
+  .dev-head button{background:none;border:none;color:#9aa4bd;font-size:14px;cursor:pointer;padding:0 2px;}
+  .dev-scroll{max-height:calc(var(--vh,1vh) * 62);overflow-y:auto;padding:8px 11px 4px;touch-action:pan-y;}
+  .dev-row{margin-bottom:11px;}
+  .dev-row .dr-top{display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:#c7cfe4;margin-bottom:4px;}
+  .dev-row .dr-top em{color:var(--cyan-hot);font-style:normal;font-weight:800;}
+  .dev-row input[type=range]{width:100%;height:22px;accent-color:#7fe3ff;cursor:pointer;}
+  .dev-row .dr-note{font-size:8px;color:#6f7a96;margin-top:1px;letter-spacing:.02em;}
+  .dev-reset{width:calc(100% - 22px);margin:2px 11px 11px;padding:9px;border:none;border-radius:9px;
+    font-size:11px;font-weight:800;letter-spacing:.1em;color:#22190a;cursor:pointer;
+    background:linear-gradient(180deg,#f7e4a4,#e7c15a);}
+
 </style>
 </head>
 <body>
@@ -280,7 +326,7 @@
 
     <img class="iv-player" id="iv-player" alt="guard hero">
 
-    <div class="ring-hub">
+    <div class="ring-hub" id="ring-hub">
       <div class="ring-guard"></div>
       <div class="ring-target" id="ring-target"></div>
       <div class="beat-ring" id="beat-ring"></div>
@@ -290,6 +336,16 @@
 
     <div class="iv-callout" id="iv-callout"></div>
     <div class="flash" id="iv-flash"></div>
+
+    <!-- Parry Fever -->
+    <div id="fever">
+      <div class="fever-veil"></div>
+      <div class="fever-rays"></div>
+      <div class="fever-title" id="fever-title">CHANCE!</div>
+      <div class="fever-count" id="fever-count">COUNTER 0</div>
+      <div class="fever-bar-wrap"><div class="fever-bar" id="fever-bar"></div></div>
+    </div>
+
     <div class="iv-hint" id="iv-hint">화면을 <b>탭</b>해 막아라</div>
   </section>
 
@@ -306,8 +362,16 @@
 
   <!-- fab -->
   <div class="fab-wrap">
+    <button class="fab gear" id="fab-dev" title="손맛 Dev 패널">⚙</button>
     <button class="fab dbg" id="fab-omen" title="보스 전조 강제">OMEN</button>
     <button class="fab" id="fab-reset" title="리셋">↻</button>
+  </div>
+
+  <!-- FEEL Dev panel (session-only) -->
+  <div id="dev-panel">
+    <div class="dev-head"><span>⚙ FEEL DEV</span><button id="dev-close">✕</button></div>
+    <div class="dev-scroll" id="dev-rows"></div>
+    <button class="dev-reset" id="dev-reset">Reset Feel Defaults</button>
   </div>
 
 </div>
@@ -319,9 +383,30 @@
   const $=s=>document.querySelector(s);
   const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
 
-  // per-enemy body scale (req: goblin small < orc_mage mid < ogre large)
-  const FOE_SIZE={ goblin:0.80, orc_mage:1.0, ogre:1.32 };
-  const FOE_BASE=58;   // % lane height baseline for front foe
+  // ---- viewport height fix (mobile browser chrome) ----
+  function setVH(){ document.documentElement.style.setProperty('--vh',(window.innerHeight*0.01)+'px'); }
+  setVH(); window.addEventListener('resize',setVH); window.addEventListener('orientationchange',setVH);
+  // block page/element scroll via touch, but allow the dev panel to scroll internally
+  document.addEventListener('touchmove',function(e){ if(!e.target.closest('.dev-scroll')) e.preventDefault(); },{passive:false});
+
+  // ---- FEEL (Dev-tunable, session only, no storage) ----
+  const FEEL_DEFAULTS={ ringSpeed:1200, parryWindow:26, guardWindow:74, poseHold:750,
+    hitstop:70, inputCooldown:0, screenShake:0.85, feverDuration:1500 };
+  let feel={...FEEL_DEFAULTS};
+  const DEV_OPTS=[
+    {key:'ringSpeed', label:'Ring Speed', min:600, max:2200, step:50, dp:0, note:'수렴 시간(ms) · 낮을수록 빠름'},
+    {key:'parryWindow', label:'Parry Window', min:10, max:60, step:2, dp:0, note:'패링 판정 폭(px)'},
+    {key:'guardWindow', label:'Guard Window', min:34, max:120, step:2, dp:0, note:'가드 판정 폭(px)'},
+    {key:'poseHold', label:'Pose Hold', min:150, max:1400, step:50, dp:0, note:'리액션 포즈 유지(ms)'},
+    {key:'hitstop', label:'Hitstop', min:0, max:400, step:10, dp:0, note:'연타 사이 정지감(ms)'},
+    {key:'inputCooldown', label:'Input Lock', min:0, max:400, step:10, dp:0, note:'탭 후 입력 잠금(ms)'},
+    {key:'screenShake', label:'Screen Shake', min:0, max:2, step:0.05, dp:2, note:'흔들림 강도(×)'},
+    {key:'feverDuration', label:'Fever Duration', min:600, max:3000, step:100, dp:0, note:'피버 지속(ms)'}
+  ];
+
+  // per-enemy body scale (goblin small < orc_mage mid < ogre large)
+  const FOE_SIZE={ goblin:0.80, orc_mage:1.02, ogre:1.34 };
+  const FOE_BASE=58;
 
   function freshFronts(){
     return [
@@ -330,23 +415,41 @@
       { id:'gate', name:'중앙 성문 전선', sub:'BROKEN GATE', bg:'broken_gate_lane_bg',
         allies:['warrior','archer'], foes:['orc_mage','goblin'], hp:61, threat:68, danger:'triple', drift:3.1 },
       { id:'woods', name:'남쪽 성벽 전선', sub:'CASTLE WALL', bg:'castle_wall_lane_bg',
-        allies:['archer','mage'], foes:['goblin'], hp:84, threat:35, danger:'normal', drift:1.5 }
+        allies:['archer','mage'], foes:['goblin','goblin','goblin'], hp:84, threat:35, danger:'normal', drift:1.5 }
     ];
   }
 
-  const state={ screen:'title', fronts:[], selectedId:null, interveneCount:0, omen:0, omenDone:false, iv:null };
+  const state={ screen:'title', fronts:[], selectedId:null, interveneCount:0, omen:0, omenDone:false, iv:null, fever:null };
   const laneEls={};
 
-  function allySrc(j,pose){ return `${A}allies/ally_${j}_${pose}.png`; }
-  function foeSrc(j,pose){ return `${A}enemies/enemy_${j}_${pose}.png`; }
+  function allySrc(j,p){ return `${A}allies/ally_${j}_${p}.png`; }
+  function foeSrc(j,p){ return `${A}enemies/enemy_${j}_${p}.png`; }
+
+  // foe layout: biggest goes back/far-right; smaller ones step toward center in FRONT (higher z) so none is buried
+  function foeLayout(foes){
+    const arr=foes.map((k,i)=>({k,size:FOE_SIZE[k]||1,ord:i}));
+    arr.sort((a,b)=>b.size-a.size||a.ord-b.ord);   // big → small (stable)
+    const n=arr.length;
+    return arr.map((o,i)=>({
+      key:o.k,
+      rightPct:(3+i*14).toFixed(1),   // keep foes on the right, staggered toward center in front
+      bottomPct:(2+i*2).toFixed(1),
+      heightPct:(o.size*FOE_BASE*(1-i*0.07)).toFixed(1),
+      z:3+i,
+      front:i===n-1,
+      fb:Math.min(i,2)
+    }));
+  }
 
   function buildLanes(){
     const wrap=$('#lanes'); wrap.innerHTML='';
     state.fronts.forEach(f=>{
       const lane=document.createElement('div');
       lane.className='lane'; lane.dataset.id=f.id;
-      const foe0=f.foes[0], foe1=f.foes[1];
-      const s0=(FOE_SIZE[foe0]||1)*FOE_BASE, s1=(FOE_SIZE[foe1]||1)*FOE_BASE*0.9;
+      const foesHtml=foeLayout(f.foes).map(o=>
+        `<img class="actor foe fb${o.fb}${o.front?' f-front':''}" style="right:${o.rightPct}%;bottom:${o.bottomPct}%;height:${o.heightPct}%;z-index:${o.z}"
+              data-idle="${foeSrc(o.key,'idle')}" data-act="${foeSrc(o.key,'act')}" src="${foeSrc(o.key,'idle')}">`
+      ).join('');
       lane.innerHTML=`
         <div class="lane-bg" style="background-image:url('${A}backgrounds/${f.bg}.png')"></div>
         <div class="lane-veil"></div>
@@ -354,8 +457,7 @@
         <div class="lane-actors">
           <img class="actor ally a-front" data-idle="${allySrc(f.allies[0],'idle')}" data-act="${allySrc(f.allies[0],'act')}" src="${allySrc(f.allies[0],'idle')}">
           ${f.allies[1]?`<img class="actor ally back" data-idle="${allySrc(f.allies[1],'idle')}" data-act="${allySrc(f.allies[1],'act')}" src="${allySrc(f.allies[1],'idle')}">`:''}
-          <img class="actor foe f-front" style="right:4%;height:${s0}%" data-idle="${foeSrc(foe0,'idle')}" data-act="${foeSrc(foe0,'act')}" src="${foeSrc(foe0,'idle')}">
-          ${foe1?`<img class="actor foe back" style="right:20%;height:${s1}%" data-idle="${foeSrc(foe1,'idle')}" data-act="${foeSrc(foe1,'act')}" src="${foeSrc(foe1,'idle')}">`:''}
+          ${foesHtml}
         </div>
         <div class="sel-ring"></div>
         <div class="lane-top">
@@ -398,14 +500,13 @@
   function renderTop(){ $('#stat-interv').textContent=state.interveneCount; $('#omen-fill').style.width=clamp(state.omen)+'%'; }
   const front=id=>state.fronts.find(f=>f.id===id);
 
-  // 2-tap control: 1st tap = select, re-tap = dive, other lane = change selection
   function onLaneTap(id){
     if(state.screen!=='observe') return;
     if(state.selectedId===id){ enterIntervene(id); return; }
     state.selectedId=id; state.fronts.forEach(renderLane);
   }
 
-  // ---------- auto-combat / liveliness ----------
+  // ---------- loop ----------
   let last=performance.now(), clashAcc=0;
   function loop(now){
     const dt=Math.min(0.05,(now-last)/1000); last=now;
@@ -423,12 +524,11 @@
         if(state.omen>=100||state.fronts.some(f=>f.threat>=96)) triggerOmen();
       }
       if(state.screen==='observe'){ clashAcc+=dt; if(clashAcc>0.5){ clashAcc=0; doClash(); } }
-      if(state.screen==='intervene'&&state.iv) beatStep(dt);
+      if(state.screen==='intervene'){ if(state.fever) feverTick(now); else if(state.iv) beatStep(dt); }
     }
     requestAnimationFrame(loop);
   }
 
-  // swap idle->act frame + lunge, flash opponent, revert
   function swingActor(img, cls){
     if(!img) return;
     const act=img.getAttribute('data-act'); if(act) img.src=act;
@@ -448,15 +548,18 @@
     }
   }
 
-  // ---------- intervention (ME only, tap-timing) ----------
-  const RING_START=320, RING_END=42, TARGET=120, PARRY_TOL=24, GUARD_TOL=72;
+  // ---------- intervention ----------
+  const RING_START=320, RING_END=42, TARGET=120;
+  let lastTap=0;
 
   function enterIntervene(id){
-    const f=front(id); state.selectedId=id; state.screen='intervene';
+    const f=front(id); state.selectedId=id; state.screen='intervene'; state.fever=null;
     const beats=f.danger==='triple'?3:1;
-    state.iv={ frontId:id, beats, idx:0, results:[], t:0, dur:1250, gap:0, awaiting:true, done:false };
+    state.iv={ frontId:id, beats, idx:0, results:[], t:0, dur:feel.ringSpeed, gap:0, awaiting:true, done:false };
     $('#iv-bg').style.backgroundImage=`url('${A}backgrounds/${f.bg}.png')`;
     $('#iv-name').innerHTML=`${f.name}<small>${f.sub}</small>`;
+    $('#s-intervene').classList.remove('fever-on');
+    $('#fever').classList.remove('show');
     setPose('anchor'); updateIvGauges(f);
     $('#iv-hint').className='iv-hint beat';
     $('#iv-hint').innerHTML= beats>1 ? `<b>3연타</b> — 수렴마다 <b>탭</b>` : `수렴 순간에 <b>탭</b>해 막아라`;
@@ -468,11 +571,11 @@
     $('#iv-th').style.width=f.threat+'%'; $('#iv-th-n').textContent=Math.round(f.threat);
   }
   function startBeat(){
-    const iv=state.iv; iv.t=0; iv.awaiting=true; iv.gap=0;
+    const iv=state.iv; iv.t=0; iv.awaiting=true; iv.gap=0; iv.dur=feel.ringSpeed;
     setPose('dash_land');
     $('#beat-count').textContent= iv.beats>1 ? `접점 ${iv.idx+1} / ${iv.beats}` : '';
     $('#ring-target').classList.remove('parryzone');
-    const br=$('#beat-ring'); br.className='beat-ring';
+    $('#beat-ring').className='beat-ring';
   }
   function beatStep(dt){
     const iv=state.iv; if(!iv||iv.done) return;
@@ -481,17 +584,23 @@
     iv.t+=dt*1000/iv.dur;
     const dia=RING_START-(RING_START-RING_END)*iv.t;
     const br=$('#beat-ring'); br.style.width=dia+'px'; br.style.height=dia+'px';
-    const near=Math.abs(dia-TARGET)<GUARD_TOL;
-    br.classList.toggle('danger', dia>TARGET+GUARD_TOL);       // still incoming -> red
-    $('#ring-target').classList.toggle('parryzone', Math.abs(dia-TARGET)<PARRY_TOL);
+    br.classList.toggle('danger', dia>TARGET+feel.guardWindow);
+    $('#ring-target').classList.toggle('parryzone', Math.abs(dia-TARGET)<feel.parryWindow);
     if(iv.t>=1.06) resolveBeat('miss');
   }
-  // single tap: outcome by timing only (no button choice)
+  // whole-screen tap → route to judge or fever counter
+  function onIvTap(){
+    if(state.fever){ counterTap(); return; }
+    const now=performance.now();
+    if(now-lastTap < feel.inputCooldown) return;   // input lock (Dev)
+    lastTap=now;
+    tapJudge();
+  }
   function tapJudge(){
     const iv=state.iv; if(!iv||!iv.awaiting||iv.gap>0||iv.done) return;
     const dia=RING_START-(RING_START-RING_END)*iv.t;
     const err=Math.abs(dia-TARGET);
-    let out = err<PARRY_TOL?'parry' : (err<GUARD_TOL?'guard':'miss');
+    const out = err<feel.parryWindow?'parry' : (err<feel.guardWindow?'guard':'miss');
     resolveBeat(out);
   }
   function resolveBeat(out){
@@ -501,8 +610,8 @@
     else if(out==='guard'){ setPose('heavy_block'); fireFlash('guard-flash'); shake(false); brace(); callout('guard','GUARD','쿠웅!'); }
     else { setPose('miss_recover'); fireFlash('hit-flash'); shake(true); hurt(); callout('miss','MISS','—'); }
     iv.idx++;
-    if(iv.idx<iv.beats){ iv.gap=560; $('#beat-ring').style.width=RING_START+'px'; $('#beat-ring').style.height=RING_START+'px'; }
-    else { iv.done=true; setTimeout(finishIntervene,1100); }
+    if(iv.idx<iv.beats){ iv.gap=400+feel.hitstop; $('#beat-ring').style.width=RING_START+'px'; $('#beat-ring').style.height=RING_START+'px'; }
+    else { iv.done=true; setTimeout(finishIntervene, feel.poseHold); }
   }
   function aggregate(r){
     if(r.every(x=>x==='parry')) return r.length>1?'parry_perfect':'parry';
@@ -519,23 +628,70 @@
     else if(outcome==='guard'){ f.threat=clamp(f.threat-16); f.hp=clamp(f.hp+1); state.omen=clamp(state.omen-3); }
     else { f.hp=clamp(f.hp-19); f.threat=clamp(f.threat+15); state.omen=clamp(state.omen+13); }
     state.interveneCount++;
-    setTimeout(()=>{
-      showScreen('observe'); state.screen='observe'; state.selectedId=null;
-      state.fronts.forEach(renderLane); renderTop(); laneBurst(f.id,outcome); state.iv=null;
-      if(!state.omenDone&&state.interveneCount>=3) triggerOmen();
-    }, outcome==='parry_perfect'?900:650);
+    // PARRY → fever chance; Guard/Miss → straight back
+    if(outcome==='parry'||outcome==='parry_perfect'){ setTimeout(()=>enterFever(f,outcome), 240); }
+    else { setTimeout(()=>returnToObserve(f,outcome,0), 340); }
+  }
+
+  // ---------- Parry Fever ("나의 찬스다!") ----------
+  function enterFever(f,outcome){
+    const dur=(outcome==='parry_perfect'?feel.feverDuration*1.3:feel.feverDuration);
+    state.fever={ front:f, outcome, taps:0, dur, start:performance.now() };
+    $('#fever-title').textContent = outcome==='parry_perfect' ? '나의 찬스다!!!!' : 'CHANCE!';
+    $('#fever-count').textContent='COUNTER 0';
+    $('#fever-bar').style.width='100%';
+    $('#fever').classList.add('show');
+    $('#s-intervene').classList.add('fever-on');
+    $('#iv-hint').className='iv-hint beat'; $('#iv-hint').innerHTML='<b>탭! 탭! 탭!</b>';
+    setPose('parry_release'); $('#iv-player').classList.add('fever');
+  }
+  function counterTap(){
+    const fv=state.fever; if(!fv) return;
+    fv.taps++;
+    $('#fever-count').textContent='COUNTER '+fv.taps;
+    const p=$('#iv-player'); p.classList.remove('swing'); void p.offsetWidth; p.classList.add('swing');
+    if(fv.taps%4===0){ fireFlash('parry-flash'); shake(false); }
+  }
+  function feverTick(now){
+    const fv=state.fever; if(!fv) return;
+    const rem=Math.max(0,1-(now-fv.start)/fv.dur);
+    $('#fever-bar').style.width=(rem*100)+'%';
+    if(now-fv.start>=fv.dur) endFever();
+  }
+  function endFever(){
+    const fv=state.fever; if(!fv) return;
+    const f=fv.front, taps=fv.taps;
+    const per=(fv.outcome==='parry_perfect'?2.4:2.0);
+    f.threat=clamp(f.threat - Math.min(taps,20)*per);   // extra threat cut, capped
+    state.omen=clamp(state.omen - taps*0.3);
+    $('#iv-player').classList.remove('fever','swing');
+    $('#fever').classList.remove('show');
+    $('#s-intervene').classList.remove('fever-on');
+    state.fever=null;
+    returnToObserve(f, fv.outcome, taps);
+  }
+
+  function returnToObserve(f, outcome, counterTaps){
+    showScreen('observe'); state.screen='observe'; state.selectedId=null;
+    state.fronts.forEach(renderLane); renderTop();
+    laneBurst(f.id, outcome, counterTaps);
+    state.iv=null;
+    if(!state.omenDone && state.interveneCount>=3) triggerOmen();
   }
 
   // ---------- FX ----------
   function callout(k,big,sm){ const c=$('#iv-callout'); c.className='iv-callout '+k; c.innerHTML=`${big}<small>${sm}</small>`; void c.offsetWidth; c.classList.add('pop'); }
   function fireFlash(cls){ const fl=$('#iv-flash'); fl.className='flash '+cls; void fl.offsetWidth; fl.classList.add('fire'); }
-  function shake(hard){ const st=$('#stage'); st.classList.remove('shake','shake-hard'); void st.offsetWidth; st.classList.add(hard?'shake-hard':'shake'); }
+  function shake(hard){ const st=$('#stage'); st.style.setProperty('--shk', feel.screenShake);
+    st.classList.remove('shake','shake-hard'); if(feel.screenShake<=0) return; void st.offsetWidth; st.classList.add(hard?'shake-hard':'shake'); }
   function brace(){ const p=$('#iv-player'); p.classList.remove('brace'); void p.offsetWidth; p.classList.add('brace'); }
   function hurt(){ const p=$('#iv-player'); p.classList.remove('hurt'); void p.offsetWidth; p.classList.add('hurt'); }
-  function laneBurst(id,outcome){
+  function laneBurst(id,outcome,counterTaps){
     const e=laneEls[id]; if(!e) return;
-    const map={parry:['parry','PARRY ✦'],parry_perfect:['parry','PERFECT ✦'],guard:['guard','GUARD'],miss:['miss','MISS']};
-    const [cls,txt]=map[outcome]||map.guard;
+    let cls,txt;
+    if(counterTaps&&counterTaps>0){ cls='parry'; txt=`COUNTER × ${counterTaps}`; }
+    else { const map={parry:['parry','PARRY ✦'],parry_perfect:['parry','PERFECT ✦'],guard:['guard','GUARD'],miss:['miss','MISS']};
+      [cls,txt]=map[outcome]||map.guard; }
     e.burst.className='lane-burst '+cls; e.burstB.textContent=txt; void e.burst.offsetWidth; e.burst.classList.add('show');
     if(outcome==='miss'){ e.root.classList.remove('shakeit'); void e.root.offsetWidth; e.root.classList.add('shakeit'); }
     else if(e.foeFront){ e.foeFront.classList.remove('hitflash'); void e.foeFront.offsetWidth; e.foeFront.classList.add('hitflash'); }
@@ -546,37 +702,70 @@
     if(state.omenDone) return;
     state.omenDone=true; state.omen=100;
     if(state.screen==='observe') renderTop();
-    $('#stage').classList.add('shake-hard');
+    $('#stage').style.setProperty('--shk', feel.screenShake); $('#stage').classList.add('shake-hard');
     Object.values(laneEls).forEach(e=>e.root.classList.add('shakeit'));
     setTimeout(()=>$('#omen-overlay').classList.add('show'),240);
   }
 
   function showScreen(name){
     ['title','observe','intervene'].forEach(s=>$('#s-'+s).classList.toggle('active',s===name));
-    $('.fab-wrap').style.display = name==='title' ? 'none' : 'flex';   // keep key-art title clean
+    $('.fab-wrap').style.display = name==='title' ? 'none' : 'flex';
+    if(name==='title') closeDev();
   }
 
   function startGame(){
     state.fronts=freshFronts();
-    state.selectedId=null; state.interveneCount=0; state.omen=0; state.omenDone=false; state.iv=null;
+    state.selectedId=null; state.interveneCount=0; state.omen=0; state.omenDone=false; state.iv=null; state.fever=null;
     buildLanes(); state.fronts.forEach(renderLane); renderTop();
     $('#omen-overlay').classList.remove('show');
     state.screen='observe'; showScreen('observe');
   }
-  function fullReset(){ $('#omen-overlay').classList.remove('show'); state.screen='title'; showScreen('title'); }
+  function fullReset(){ $('#omen-overlay').classList.remove('show'); state.fever=null; state.iv=null; state.screen='title'; showScreen('title'); }
+
+  // ---------- Dev panel ----------
+  function buildDev(){
+    const wrap=$('#dev-rows'); wrap.innerHTML='';
+    DEV_OPTS.forEach(o=>{
+      const row=document.createElement('div'); row.className='dev-row';
+      row.innerHTML=`<div class="dr-top"><span>${o.label}</span><em id="dv-${o.key}"></em></div>
+        <input type="range" id="dr-${o.key}" min="${o.min}" max="${o.max}" step="${o.step}">
+        <div class="dr-note">${o.note}</div>`;
+      wrap.appendChild(row);
+      const inp=row.querySelector('input');
+      inp.value=feel[o.key];
+      row.querySelector('em').textContent=fmtFeel(o,feel[o.key]);
+      inp.addEventListener('input',()=>{ feel[o.key]=Number(inp.value); row.querySelector('em').textContent=fmtFeel(o,feel[o.key]);
+        if(o.key==='screenShake') $('#stage').style.setProperty('--shk',feel.screenShake); });
+    });
+  }
+  function fmtFeel(o,v){ return (o.dp?Number(v).toFixed(o.dp):Math.round(v))+(o.key==='screenShake'?'×':(o.key==='parryWindow'||o.key==='guardWindow'?'px':'ms')); }
+  function syncDev(){ DEV_OPTS.forEach(o=>{ const inp=$('#dr-'+o.key); if(inp){ inp.value=feel[o.key]; $('#dv-'+o.key).textContent=fmtFeel(o,feel[o.key]); } }); }
+  function openDev(){ $('#dev-panel').classList.add('show'); }
+  function closeDev(){ $('#dev-panel').classList.remove('show'); }
+  function resetFeel(){ Object.assign(feel, FEEL_DEFAULTS); $('#stage').style.setProperty('--shk',feel.screenShake); syncDev(); }
 
   // ---------- wire ----------
   $('#s-title').addEventListener('click', startGame);
-  $('#s-intervene').addEventListener('click', tapJudge);
+  $('#s-intervene').addEventListener('click', onIvTap);
   $('#btn-omen-ack').addEventListener('click', ()=>{ $('#omen-overlay').classList.remove('show'); state.screen='observe'; showScreen('observe'); state.fronts.forEach(renderLane); });
   $('#fab-reset').addEventListener('click', (e)=>{ e.stopPropagation(); fullReset(); });
   $('#fab-omen').addEventListener('click', (e)=>{ e.stopPropagation(); if(state.screen!=='title') triggerOmen(); });
+  $('#fab-dev').addEventListener('click', (e)=>{ e.stopPropagation(); $('#dev-panel').classList.toggle('show'); });
+  $('#dev-close').addEventListener('click', (e)=>{ e.stopPropagation(); closeDev(); });
+  $('#dev-reset').addEventListener('click', (e)=>{ e.stopPropagation(); resetFeel(); });
+  $('#dev-panel').addEventListener('click', e=>e.stopPropagation());
 
-  // dev-only inspection hook (no gameplay change; used for smoke verification)
-  window.__QV={ state, front, enterIntervene,
+  buildDev();
+  $('#stage').style.setProperty('--shk', feel.screenShake);
+
+  // dev/inspection hook (no gameplay change; used for smoke verification)
+  window.__QV={ state, front, feel, enterIntervene, resetFeel,
+    setFeel(k,v){ feel[k]=v; syncDev(); if(k==='screenShake') $('#stage').style.setProperty('--shk',v); },
     forceBeat(errPx){ const iv=state.iv; if(!iv) return 'no-iv';
       const dia=TARGET+(errPx||0); iv.t=(RING_START-dia)/(RING_START-RING_END); iv.awaiting=true; iv.gap=0;
-      tapJudge(); return {results:iv.results.slice(), idx:iv.idx, done:iv.done}; } };
+      tapJudge(); return {results:iv.results.slice(), idx:iv.idx, done:iv.done}; },
+    feverTap(){ counterTap(); return state.fever?state.fever.taps:null; },
+    endFever };
 
   requestAnimationFrame(loop);
 })();
