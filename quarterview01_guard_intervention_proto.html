@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GUARD SEED — Quarterview R&amp;D 01</title>
+<!--
+  Guard Seed × Quarterview R&D 01 (pass 01A) — quarterview01_guard_intervention_proto.html
+  New file. C7 (seed02c7_triple_guard_finish_polish.html) is reference-only and NOT touched.
+  Loop: Title(key art) → 3-front observe (battlefield-first, no system panel)
+        → tap select / re-tap dive → shield intervention (ME only, tap-timing Guard/Parry/Miss,
+        central convergence) → result returns to the SELECTED front → boss omen(key art).
+  Bodies via assets/qv01/ (relative PNG, incl. sheet-extracted idle/act frames). FX = CSS/SVG.
+  No external CDN/URL/library.
+-->
+<style>
+  :root{
+    --stage-w: 390px;
+    --stage-h: 844px;
+    --gold:#e7c15a; --gold-soft:#c9a94a;
+    --cyan:#7fe3ff; --cyan-hot:#c9f6ff;
+    --hp1:#4fd18a; --hp2:#2f9d6a;
+    --th1:#ffb454; --th2:#e5473f;
+    --danger:#ff5442;
+    --txt:#e9edf6; --txt-dim:#9aa4bd;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;background:#05060a;color:var(--txt);
+    font-family:"Segoe UI",-apple-system,"Malgun Gothic",system-ui,sans-serif;}
+  body{display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:auto;}
+
+  #stage{position:relative; width:var(--stage-w); height:var(--stage-h);
+    max-width:100vw; overflow:hidden; background:#05060a; border-radius:18px;
+    box-shadow:0 24px 70px rgba(0,0,0,.7), 0 0 0 1px #000; user-select:none;}
+
+  .screen{position:absolute; inset:0; display:none; flex-direction:column;}
+  .screen.active{display:flex;}
+
+  /* ===================== TITLE (key art) ===================== */
+  #s-title{cursor:pointer;
+    background:center/cover no-repeat url('assets/qv01/ui/guardseed_title.png');
+    background-color:#05060a; animation:titleBreathe 7s ease-in-out infinite;}
+  @keyframes titleBreathe{0%,100%{background-size:cover}50%{background-size:112%}}
+  .title-tap{position:absolute;left:0;right:0;bottom:96px;z-index:3;text-align:center;
+    font-size:11px;letter-spacing:.34em;color:#ffe9b8;text-transform:uppercase;
+    text-shadow:0 0 12px rgba(231,193,90,.7),0 2px 4px #000;pointer-events:none;
+    animation:tapPulse 1.5s ease-in-out infinite;}
+  @keyframes tapPulse{0%,100%{opacity:.35;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+  .title-glow{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);z-index:2;
+    width:260px;height:120px;pointer-events:none;
+    background:radial-gradient(50% 60% at 50% 50%,rgba(231,193,90,.28),transparent 70%);
+    animation:tapPulse 1.5s ease-in-out infinite;}
+
+  /* ===================== OBSERVE (battlefield-first) ===================== */
+  #s-observe{background:#070911;}
+  .topbar{padding:9px 13px 8px;flex:0 0 auto;
+    background:linear-gradient(180deg,rgba(20,26,45,.96),rgba(12,15,26,.9));
+    border-bottom:1px solid rgba(60,70,110,.5);z-index:6;}
+  .topbar-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+  .campaign{font-size:12px;letter-spacing:.18em;color:var(--gold);font-weight:800;text-transform:uppercase;}
+  .campaign small{display:block;font-size:8.5px;letter-spacing:.14em;color:var(--txt-dim);font-weight:500;margin-top:1px;}
+  .war-stat{font-size:10px;color:var(--txt-dim);text-align:right;}
+  .war-stat b{color:#e9edf6;font-size:12px;}
+  .omen-bar{position:relative;height:11px;border-radius:8px;background:#0a0c14;
+    border:1px solid #34263a;overflow:hidden;}
+  .omen-bar i{position:absolute;inset:0;width:0%;
+    background:linear-gradient(90deg,#6a2540,#b23a4e 55%,#ff5a5a);
+    box-shadow:0 0 12px rgba(255,90,90,.5);transition:width .25s;}
+  .omen-bar span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:8px;letter-spacing:.24em;color:#ffd7d7;text-shadow:0 1px 2px #000;font-weight:700;}
+
+  /* lanes fill everything below the topbar -> screen bottom is battlefield, no panel */
+  .lanes{flex:1 1 auto;display:flex;flex-direction:column;gap:2px;overflow:hidden;}
+  .lane{position:relative;flex:1 1 0;min-height:0;overflow:hidden;cursor:pointer;
+    border-top:1px solid rgba(0,0,0,.5);transition:transform .1s;}
+  .lane:active{transform:scale(.995);}
+  .lane-bg{position:absolute;inset:0;background-size:cover;background-position:center 36%;transform:scale(1.04);}
+  .lane-veil{position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(6,8,14,.12),rgba(6,8,14,.03) 40%,rgba(6,8,14,.66));}
+  .lane-actors{position:absolute;inset:0;}
+  .actor{position:absolute;bottom:2%;filter:drop-shadow(0 6px 6px rgba(0,0,0,.55));
+    transform-origin:bottom center;pointer-events:none;height:64%;}
+  .actor.ally{left:4%;}
+  .actor.ally.back{left:19%;height:56%;z-index:2;opacity:.95;}
+  .actor.foe{transform:scaleX(-1);}
+  .actor.foe.back{z-index:2;opacity:.95;}
+  .actor.a-front{z-index:3;animation:bobA 2.7s ease-in-out infinite;}
+  .actor.f-front{z-index:3;animation:bobB 2.5s ease-in-out infinite;}
+  @keyframes bobA{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+  @keyframes bobB{0%,100%{transform:scaleX(-1) translateY(0)}50%{transform:scaleX(-1) translateY(-2px)}}
+  .actor.ally.lunge{animation:lungeA .32s ease-out;}
+  @keyframes lungeA{0%{transform:translateX(0)}42%{transform:translateX(15px)}100%{transform:translateX(0)}}
+  .actor.foe.lunge{animation:lungeB .32s ease-out;}
+  @keyframes lungeB{0%{transform:scaleX(-1) translateX(0)}42%{transform:scaleX(-1) translateX(15px)}100%{transform:scaleX(-1) translateX(0)}}
+  .actor.hitflash{animation:hitflash .3s ease-out;}
+  @keyframes hitflash{0%,100%{filter:drop-shadow(0 6px 6px rgba(0,0,0,.55))}
+    35%{filter:drop-shadow(0 6px 6px rgba(0,0,0,.55)) brightness(2.4) saturate(.4)}}
+  .actor.recoil{animation:recoil .3s ease-out;}
+  @keyframes recoil{0%,100%{}40%{filter:drop-shadow(0 6px 6px rgba(0,0,0,.55)) brightness(1.6);}}
+
+  .lane-top{position:absolute;top:0;left:0;right:0;padding:6px 8px;display:flex;
+    align-items:flex-start;justify-content:space-between;z-index:5;}
+  .lane-name{font-size:11px;font-weight:800;color:#fff;text-shadow:0 1px 3px #000,0 0 8px rgba(0,0,0,.6);}
+  .lane-name small{display:block;font-size:8px;font-weight:600;letter-spacing:.14em;color:#c7cfe4;opacity:.85;}
+  .danger-badge{font-size:8px;font-weight:800;letter-spacing:.1em;padding:3px 7px;border-radius:20px;
+    text-transform:uppercase;border:1px solid transparent;backdrop-filter:blur(2px);}
+  .danger-badge.normal{color:#bfe9cf;background:rgba(30,70,50,.5);border-color:#3f7d5c;}
+  .danger-badge.heavy{color:#ffe0b0;background:rgba(90,60,20,.5);border-color:#c79a4c;}
+  .danger-badge.triple{color:#ffd0c8;background:rgba(90,30,25,.55);border-color:#d76a5c;}
+  .danger-badge.crit{color:#fff;background:rgba(150,25,25,.72);border-color:#ff5442;animation:critBadge .7s ease-in-out infinite;}
+  @keyframes critBadge{0%,100%{box-shadow:0 0 0 rgba(255,84,66,0)}50%{box-shadow:0 0 14px rgba(255,84,66,.85)}}
+
+  .lane-gauges{position:absolute;left:8px;right:8px;bottom:7px;z-index:5;display:flex;flex-direction:column;gap:4px;}
+  .g{position:relative;height:9px;border-radius:6px;background:rgba(6,8,14,.72);
+    border:1px solid rgba(255,255,255,.1);overflow:hidden;}
+  .g i{position:absolute;left:0;top:0;bottom:0;transition:width .3s;}
+  .g-hp i{background:linear-gradient(90deg,var(--hp2),var(--hp1));}
+  .g-threat i{background:linear-gradient(90deg,var(--th1),var(--th2));}
+  .g label{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-size:7px;letter-spacing:.14em;
+    font-weight:800;color:rgba(255,255,255,.92);text-shadow:0 1px 1px rgba(0,0,0,.8);z-index:2;}
+  .g b{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:7.5px;font-weight:800;
+    color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.8);z-index:2;}
+
+  .sel-ring{position:absolute;inset:0;pointer-events:none;z-index:6;opacity:0;
+    border:2px solid var(--gold);box-shadow:inset 0 0 22px rgba(231,193,90,.3);}
+  .lane.selected .sel-ring{opacity:1;animation:selRing 1.5s ease-in-out infinite;}
+  @keyframes selRing{0%,100%{box-shadow:inset 0 0 14px rgba(231,193,90,.24)}50%{box-shadow:inset 0 0 32px rgba(231,193,90,.55)}}
+  /* diegetic dive hint on the selected lane (not a system panel) */
+  .dive-hint{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);z-index:7;opacity:0;
+    padding:5px 13px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.06em;
+    color:#22190a;background:linear-gradient(180deg,#f7e4a4,#e7c15a);white-space:nowrap;
+    box-shadow:0 4px 14px rgba(231,193,90,.45);pointer-events:none;}
+  .lane.selected .dive-hint{opacity:1;animation:diveHint 1.2s ease-in-out infinite;}
+  @keyframes diveHint{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-3px)}}
+
+  .warn-glow{position:absolute;inset:0;pointer-events:none;z-index:4;opacity:0;}
+  .lane.danger .warn-glow{opacity:1;animation:warnGlow 1s ease-in-out infinite;}
+  @keyframes warnGlow{0%,100%{box-shadow:inset 0 0 20px rgba(255,60,50,.25)}50%{box-shadow:inset 0 0 40px rgba(255,60,50,.6)}}
+  .lane.shakeit .lane-actors{animation:laneShake .34s ease-in-out;}
+  @keyframes laneShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}60%{transform:translateX(3px)}}
+
+  .lane-burst{position:absolute;inset:0;z-index:8;pointer-events:none;display:flex;align-items:center;justify-content:center;opacity:0;}
+  .lane-burst.show{animation:burst 1.15s ease-out;}
+  @keyframes burst{0%{opacity:0;transform:scale(.6)}18%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.12)}}
+  .lane-burst b{font-size:24px;font-weight:900;text-shadow:0 2px 10px #000;}
+  .lane-burst.parry b{color:var(--cyan-hot);text-shadow:0 0 18px var(--cyan),0 2px 6px #000;}
+  .lane-burst.guard b{color:#ffe1a8;text-shadow:0 0 16px #d9a53e,0 2px 6px #000;}
+  .lane-burst.miss b{color:#ff8b7e;text-shadow:0 0 16px #e5473f,0 2px 6px #000;}
+
+  /* ===================== INTERVENE (ME only) ===================== */
+  #s-intervene{background:#04050a;cursor:pointer;}
+  .iv-bg{position:absolute;inset:0;background-size:cover;background-position:center 42%;
+    transform:scale(1.14);filter:brightness(.5) saturate(.9) blur(2px);}
+  .iv-veil{position:absolute;inset:0;
+    background:radial-gradient(70% 55% at 50% 58%,transparent 22%,rgba(3,4,9,.86) 100%),
+      linear-gradient(180deg,rgba(3,4,9,.7),rgba(3,4,9,.25) 42%,rgba(3,4,9,.94));}
+  .iv-top{position:absolute;top:0;left:0;right:0;z-index:6;padding:12px 14px;}
+  .iv-top .lane-name{font-size:14px;}
+  .iv-mini-g{margin-top:8px;display:flex;flex-direction:column;gap:5px;}
+
+  /* 01B: ME pushed to the bottom — "아래에서 버티고 막는 주인공" (clears the convergence UI) */
+  .iv-player{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);height:45%;z-index:5;
+    filter:drop-shadow(0 12px 14px rgba(0,0,0,.65));transition:transform .16s;}
+  .iv-player.hurt{animation:plHurt .42s ease-out;}
+  @keyframes plHurt{0%,100%{transform:translateX(-50%)}30%{transform:translateX(calc(-50% - 12px)) rotate(-3deg)}}
+  .iv-player.brace{animation:plBrace .4s ease-out;}
+  @keyframes plBrace{0%,100%{transform:translateX(-50%)}40%{transform:translateX(-50%) scale(1.04)}}
+
+  /* convergence ring — the incoming threat collapsing onto ME */
+  /* 01B: convergence UI raised to the upper-middle (~2/3 up the screen), above ME */
+  .ring-hub{position:absolute;left:50%;top:33%;transform:translate(-50%,-50%);z-index:4;
+    width:260px;height:260px;pointer-events:none;}
+  .ring-guard,.ring-target,.beat-ring{position:absolute;left:50%;top:50%;border-radius:50%;transform:translate(-50%,-50%);}
+  .ring-guard{width:190px;height:190px;border:2px dashed rgba(150,175,215,.35);}
+  .ring-target{width:120px;height:120px;border:3px solid rgba(231,225,168,.65);
+    box-shadow:0 0 22px rgba(231,193,90,.28),inset 0 0 18px rgba(255,255,255,.12);}
+  .ring-target.parryzone{border-color:var(--cyan);box-shadow:0 0 30px var(--cyan),inset 0 0 20px rgba(127,227,255,.45);}
+  .beat-ring{width:120px;height:120px;border:5px solid var(--cyan-hot);
+    box-shadow:0 0 26px var(--cyan),inset 0 0 16px rgba(201,246,255,.5);opacity:.96;}
+  .beat-ring.danger{border-color:#ff6a5a;box-shadow:0 0 26px #ff5442,inset 0 0 16px rgba(255,120,100,.5);}
+  .ring-core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;
+    background:radial-gradient(circle,#fff,#7fe3ff);box-shadow:0 0 16px var(--cyan);}
+  .beat-count{position:absolute;left:50%;top:calc(33% + 132px);transform:translateX(-50%);z-index:6;
+    font-size:11px;letter-spacing:.2em;color:#cfe8ff;font-weight:700;text-shadow:0 1px 4px #000;}
+
+  .iv-callout{position:absolute;left:50%;top:20%;transform:translate(-50%,-50%);z-index:8;
+    font-size:42px;font-weight:900;pointer-events:none;opacity:0;text-align:center;}
+  .iv-callout.pop{animation:callPop .8s ease-out;}
+  @keyframes callPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}
+    22%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-58%) scale(1)}}
+  .iv-callout.parry{color:var(--cyan-hot);text-shadow:0 0 24px var(--cyan),0 0 6px #fff;}
+  .iv-callout.guard{color:#ffe1a8;text-shadow:0 0 20px #d9a53e,0 2px 4px #000;}
+  .iv-callout.miss{color:#ff8b7e;text-shadow:0 0 20px #e5473f,0 2px 4px #000;}
+  .iv-callout small{display:block;font-size:13px;letter-spacing:.28em;margin-top:2px;font-weight:800;}
+
+  .flash{position:absolute;inset:0;z-index:7;pointer-events:none;opacity:0;}
+  .flash.parry-flash{background:radial-gradient(60% 50% at 50% 48%,rgba(201,246,255,.95),rgba(127,227,255,.2) 45%,transparent 70%);}
+  .flash.guard-flash{background:radial-gradient(55% 45% at 50% 48%,rgba(255,230,180,.7),transparent 65%);}
+  .flash.finish-flash{background:radial-gradient(72% 60% at 50% 48%,rgba(255,255,255,.98),rgba(201,246,255,.5) 50%,transparent 75%);}
+  .flash.hit-flash{background:radial-gradient(55% 45% at 50% 48%,rgba(255,60,50,.62),transparent 62%);}
+  .flash.fire{animation:flashFire .5s ease-out;}
+  @keyframes flashFire{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
+
+  .iv-hint{position:absolute;bottom:15px;left:0;right:0;z-index:8;text-align:center;
+    font-size:13px;color:#dbe6fb;letter-spacing:.04em;pointer-events:none;
+    text-shadow:0 1px 6px #000;}
+  .iv-hint b{color:var(--cyan);}
+  .iv-hint.beat{animation:hintPulse 1s ease-in-out infinite;}
+  @keyframes hintPulse{0%,100%{opacity:.7}50%{opacity:1}}
+
+  #stage.shake{animation:stageShake .32s ease-in-out;}
+  @keyframes stageShake{0%,100%{transform:translate(0,0)}20%{transform:translate(-5px,3px)}45%{transform:translate(4px,-3px)}70%{transform:translate(-3px,2px)}}
+  #stage.shake-hard{animation:stageShakeHard .5s ease-in-out;}
+  @keyframes stageShakeHard{0%,100%{transform:translate(0,0)}15%{transform:translate(-9px,5px)}35%{transform:translate(8px,-5px)}55%{transform:translate(-7px,4px)}80%{transform:translate(5px,-3px)}}
+
+  /* ===================== BOSS OMEN (key art) ===================== */
+  #omen-overlay{position:absolute;inset:0;z-index:40;display:none;align-items:flex-end;justify-content:center;
+    background:#04040a;}
+  #omen-overlay.show{display:flex;animation:omenIn .9s ease-out;}
+  @keyframes omenIn{0%{opacity:0}100%{opacity:1}}
+  .omen-art{position:absolute;inset:0;background:center/cover no-repeat url('assets/qv01/ui/guardseed_boss.png');
+    animation:omenArt 3.6s ease-in-out infinite;}
+  @keyframes omenArt{0%,100%{transform:scale(1.02)}50%{transform:scale(1.06)}}
+  .omen-red{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(80% 60% at 50% 45%,transparent 40%,rgba(120,0,0,.5) 100%);
+    animation:omenRed 1.4s ease-in-out infinite;}
+  @keyframes omenRed{0%,100%{opacity:.55}50%{opacity:1}}
+  .omen-scan{position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(180deg,rgba(255,0,0,.05) 0 2px,transparent 2px 5px);
+    animation:omenShake 2.2s ease-in-out infinite;}
+  @keyframes omenShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+  .omen-next{position:relative;z-index:5;margin-bottom:70px;text-align:center;}
+  .omen-next span{display:block;font-size:10px;letter-spacing:.2em;color:#ff9a9a;text-transform:uppercase;
+    margin-bottom:12px;text-shadow:0 2px 6px #000;animation:tapPulse 1.6s ease-in-out infinite;}
+  .btn-omen{padding:13px 40px;border:1px solid #ff5442;border-radius:40px;background:rgba(60,10,12,.7);
+    color:#ffdada;font-weight:800;letter-spacing:.2em;font-size:12px;cursor:pointer;
+    box-shadow:0 0 20px rgba(255,84,66,.35);backdrop-filter:blur(2px);}
+
+  .fab-wrap{position:absolute;top:8px;right:8px;z-index:50;display:flex;gap:6px;}
+  .fab{width:28px;height:28px;border-radius:50%;border:1px solid rgba(60,70,110,.6);
+    background:rgba(20,24,39,.8);color:#aeb7d0;font-size:12px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
+  .fab:active{transform:scale(.9);}
+  .fab.dbg{font-size:8.5px;width:auto;padding:0 8px;border-radius:16px;}
+  .fab-wrap{display:none;}   /* revealed by showScreen for observe/intervene; hidden on key-art title */
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ============ TITLE ============ -->
+  <section id="s-title" class="screen active">
+    <div class="title-glow"></div>
+    <div class="title-tap">▶ Tap to Start ◀</div>
+  </section>
+
+  <!-- ============ OBSERVE ============ -->
+  <section id="s-observe" class="screen">
+    <div class="topbar">
+      <div class="topbar-row">
+        <div class="campaign">전황 관찰<small>THE SIEGE · NIGHT 1</small></div>
+        <div class="war-stat">개입 <b id="stat-interv">0</b> / 3</div>
+      </div>
+      <div class="omen-bar"><i id="omen-fill"></i><span>BOSS OMEN</span></div>
+    </div>
+    <div class="lanes" id="lanes"></div>
+  </section>
+
+  <!-- ============ INTERVENE ============ -->
+  <section id="s-intervene" class="screen">
+    <div class="iv-bg" id="iv-bg"></div>
+    <div class="iv-veil"></div>
+    <div class="iv-top">
+      <div class="lane-name" id="iv-name">전선</div>
+      <div class="iv-mini-g">
+        <div class="g g-hp"><label>버팀</label><i id="iv-hp"></i><b id="iv-hp-n"></b></div>
+        <div class="g g-threat"><label>위협</label><i id="iv-th"></i><b id="iv-th-n"></b></div>
+      </div>
+    </div>
+
+    <img class="iv-player" id="iv-player" alt="guard hero">
+
+    <div class="ring-hub">
+      <div class="ring-guard"></div>
+      <div class="ring-target" id="ring-target"></div>
+      <div class="beat-ring" id="beat-ring"></div>
+      <div class="ring-core"></div>
+    </div>
+    <div class="beat-count" id="beat-count"></div>
+
+    <div class="iv-callout" id="iv-callout"></div>
+    <div class="flash" id="iv-flash"></div>
+    <div class="iv-hint" id="iv-hint">화면을 <b>탭</b>해 막아라</div>
+  </section>
+
+  <!-- ============ BOSS OMEN ============ -->
+  <div id="omen-overlay">
+    <div class="omen-art"></div>
+    <div class="omen-red"></div>
+    <div class="omen-scan"></div>
+    <div class="omen-next">
+      <span>— 보스 개입은 다음 프로토타입에서 —</span>
+      <button class="btn-omen" id="btn-omen-ack">전선으로 복귀</button>
+    </div>
+  </div>
+
+  <!-- fab -->
+  <div class="fab-wrap">
+    <button class="fab dbg" id="fab-omen" title="보스 전조 강제">OMEN</button>
+    <button class="fab" id="fab-reset" title="리셋">↻</button>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const A='assets/qv01/';
+  const $=s=>document.querySelector(s);
+  const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
+
+  // per-enemy body scale (req: goblin small < orc_mage mid < ogre large)
+  const FOE_SIZE={ goblin:0.80, orc_mage:1.0, ogre:1.32 };
+  const FOE_BASE=58;   // % lane height baseline for front foe
+
+  function freshFronts(){
+    return [
+      { id:'north', name:'북쪽 폐허 전선', sub:'BURNING RUINS', bg:'burning_ruins_lane_bg',
+        allies:['warrior','priest'], foes:['ogre','goblin'], hp:76, threat:42, danger:'heavy', drift:2.3 },
+      { id:'gate', name:'중앙 성문 전선', sub:'BROKEN GATE', bg:'broken_gate_lane_bg',
+        allies:['warrior','archer'], foes:['orc_mage','goblin'], hp:61, threat:68, danger:'triple', drift:3.1 },
+      { id:'woods', name:'남쪽 성벽 전선', sub:'CASTLE WALL', bg:'castle_wall_lane_bg',
+        allies:['archer','mage'], foes:['goblin'], hp:84, threat:35, danger:'normal', drift:1.5 }
+    ];
+  }
+
+  const state={ screen:'title', fronts:[], selectedId:null, interveneCount:0, omen:0, omenDone:false, iv:null };
+  const laneEls={};
+
+  function allySrc(j,pose){ return `${A}allies/ally_${j}_${pose}.png`; }
+  function foeSrc(j,pose){ return `${A}enemies/enemy_${j}_${pose}.png`; }
+
+  function buildLanes(){
+    const wrap=$('#lanes'); wrap.innerHTML='';
+    state.fronts.forEach(f=>{
+      const lane=document.createElement('div');
+      lane.className='lane'; lane.dataset.id=f.id;
+      const foe0=f.foes[0], foe1=f.foes[1];
+      const s0=(FOE_SIZE[foe0]||1)*FOE_BASE, s1=(FOE_SIZE[foe1]||1)*FOE_BASE*0.9;
+      lane.innerHTML=`
+        <div class="lane-bg" style="background-image:url('${A}backgrounds/${f.bg}.png')"></div>
+        <div class="lane-veil"></div>
+        <div class="warn-glow"></div>
+        <div class="lane-actors">
+          <img class="actor ally a-front" data-idle="${allySrc(f.allies[0],'idle')}" data-act="${allySrc(f.allies[0],'act')}" src="${allySrc(f.allies[0],'idle')}">
+          ${f.allies[1]?`<img class="actor ally back" data-idle="${allySrc(f.allies[1],'idle')}" data-act="${allySrc(f.allies[1],'act')}" src="${allySrc(f.allies[1],'idle')}">`:''}
+          <img class="actor foe f-front" style="right:4%;height:${s0}%" data-idle="${foeSrc(foe0,'idle')}" data-act="${foeSrc(foe0,'act')}" src="${foeSrc(foe0,'idle')}">
+          ${foe1?`<img class="actor foe back" style="right:20%;height:${s1}%" data-idle="${foeSrc(foe1,'idle')}" data-act="${foeSrc(foe1,'act')}" src="${foeSrc(foe1,'idle')}">`:''}
+        </div>
+        <div class="sel-ring"></div>
+        <div class="lane-top">
+          <div class="lane-name">${f.name}<small>${f.sub}</small></div>
+          <div class="danger-badge ${f.danger}"></div>
+        </div>
+        <div class="lane-gauges">
+          <div class="g g-hp"><label>버팀</label><i></i><b></b></div>
+          <div class="g g-threat"><label>위협</label><i></i><b></b></div>
+        </div>
+        <div class="dive-hint">다시 탭 → 개입 ▶</div>
+        <div class="lane-burst"><b></b></div>`;
+      wrap.appendChild(lane);
+      laneEls[f.id]={
+        root:lane, actors:lane.querySelector('.lane-actors'),
+        allyFront:lane.querySelector('.actor.ally.a-front'),
+        foeFront:lane.querySelector('.actor.foe.f-front'),
+        badge:lane.querySelector('.danger-badge'),
+        hp:lane.querySelector('.g-hp i'), hpN:lane.querySelector('.g-hp b'),
+        th:lane.querySelector('.g-threat i'), thN:lane.querySelector('.g-threat b'),
+        burst:lane.querySelector('.lane-burst'), burstB:lane.querySelector('.lane-burst b')
+      };
+      lane.addEventListener('click',()=>onLaneTap(f.id));
+    });
+  }
+
+  function dangerClass(f){ if(f.threat>=88||f.hp<=22) return 'crit'; return f.danger; }
+  function dangerLabel(f){ const c=dangerClass(f);
+    if(c==='crit')return '⚠ 위험'; if(c==='triple')return '● 3연타'; if(c==='heavy')return '● 격전'; return '○ 안정'; }
+
+  function renderLane(f){
+    const e=laneEls[f.id]; if(!e) return;
+    e.hp.style.width=f.hp+'%'; e.hpN.textContent=Math.round(f.hp);
+    e.th.style.width=f.threat+'%'; e.thN.textContent=Math.round(f.threat);
+    const c=dangerClass(f);
+    e.badge.className='danger-badge '+c; e.badge.textContent=dangerLabel(f);
+    e.root.classList.toggle('danger', c==='crit');
+    e.root.classList.toggle('selected', state.selectedId===f.id);
+  }
+  function renderTop(){ $('#stat-interv').textContent=state.interveneCount; $('#omen-fill').style.width=clamp(state.omen)+'%'; }
+  const front=id=>state.fronts.find(f=>f.id===id);
+
+  // 2-tap control: 1st tap = select, re-tap = dive, other lane = change selection
+  function onLaneTap(id){
+    if(state.screen!=='observe') return;
+    if(state.selectedId===id){ enterIntervene(id); return; }
+    state.selectedId=id; state.fronts.forEach(renderLane);
+  }
+
+  // ---------- auto-combat / liveliness ----------
+  let last=performance.now(), clashAcc=0;
+  function loop(now){
+    const dt=Math.min(0.05,(now-last)/1000); last=now;
+    if(state.screen==='observe'||state.screen==='intervene'){
+      state.fronts.forEach(f=>{
+        if(state.iv&&state.iv.frontId===f.id&&state.screen==='intervene') return;
+        f.threat=clamp(f.threat+f.drift*dt+(Math.random()-0.45)*6*dt);
+        if(f.threat>70) f.hp=clamp(f.hp-(f.threat-70)*0.03*dt);
+        if(state.screen==='observe') renderLane(f);
+      });
+      if(!state.omenDone){
+        const hot=state.fronts.filter(f=>f.threat>=82).length;
+        state.omen=clamp(state.omen+dt*(1.1+hot*1.6));
+        if(state.screen==='observe') renderTop();
+        if(state.omen>=100||state.fronts.some(f=>f.threat>=96)) triggerOmen();
+      }
+      if(state.screen==='observe'){ clashAcc+=dt; if(clashAcc>0.5){ clashAcc=0; doClash(); } }
+      if(state.screen==='intervene'&&state.iv) beatStep(dt);
+    }
+    requestAnimationFrame(loop);
+  }
+
+  // swap idle->act frame + lunge, flash opponent, revert
+  function swingActor(img, cls){
+    if(!img) return;
+    const act=img.getAttribute('data-act'); if(act) img.src=act;
+    img.classList.remove(cls); void img.offsetWidth; img.classList.add(cls);
+    setTimeout(()=>{ const idle=img.getAttribute('data-idle'); if(idle) img.src=idle; img.classList.remove(cls); },300);
+  }
+  function doClash(){
+    const f=state.fronts[Math.floor(Math.random()*state.fronts.length)];
+    const e=laneEls[f.id]; if(!e) return;
+    if(Math.random()<0.5){
+      swingActor(e.allyFront,'lunge');
+      if(e.foeFront){ e.foeFront.classList.remove('hitflash'); void e.foeFront.offsetWidth; e.foeFront.classList.add('hitflash'); }
+    } else {
+      swingActor(e.foeFront,'lunge');
+      if(e.allyFront){ e.allyFront.classList.remove('hitflash'); void e.allyFront.offsetWidth; e.allyFront.classList.add('hitflash'); }
+      if(f.threat>60){ e.root.classList.remove('shakeit'); void e.root.offsetWidth; e.root.classList.add('shakeit'); }
+    }
+  }
+
+  // ---------- intervention (ME only, tap-timing) ----------
+  const RING_START=320, RING_END=42, TARGET=120, PARRY_TOL=24, GUARD_TOL=72;
+
+  function enterIntervene(id){
+    const f=front(id); state.selectedId=id; state.screen='intervene';
+    const beats=f.danger==='triple'?3:1;
+    state.iv={ frontId:id, beats, idx:0, results:[], t:0, dur:1250, gap:0, awaiting:true, done:false };
+    $('#iv-bg').style.backgroundImage=`url('${A}backgrounds/${f.bg}.png')`;
+    $('#iv-name').innerHTML=`${f.name}<small>${f.sub}</small>`;
+    setPose('anchor'); updateIvGauges(f);
+    $('#iv-hint').className='iv-hint beat';
+    $('#iv-hint').innerHTML= beats>1 ? `<b>3연타</b> — 수렴마다 <b>탭</b>` : `수렴 순간에 <b>탭</b>해 막아라`;
+    showScreen('intervene'); startBeat();
+  }
+  function setPose(p){ $('#iv-player').src=`${A}player/player_guard_${p}.png`; }
+  function updateIvGauges(f){
+    $('#iv-hp').style.width=f.hp+'%'; $('#iv-hp-n').textContent=Math.round(f.hp);
+    $('#iv-th').style.width=f.threat+'%'; $('#iv-th-n').textContent=Math.round(f.threat);
+  }
+  function startBeat(){
+    const iv=state.iv; iv.t=0; iv.awaiting=true; iv.gap=0;
+    setPose('dash_land');
+    $('#beat-count').textContent= iv.beats>1 ? `접점 ${iv.idx+1} / ${iv.beats}` : '';
+    $('#ring-target').classList.remove('parryzone');
+    const br=$('#beat-ring'); br.className='beat-ring';
+  }
+  function beatStep(dt){
+    const iv=state.iv; if(!iv||iv.done) return;
+    if(iv.gap>0){ iv.gap-=dt*1000; if(iv.gap<=0) startBeat(); return; }
+    if(!iv.awaiting) return;
+    iv.t+=dt*1000/iv.dur;
+    const dia=RING_START-(RING_START-RING_END)*iv.t;
+    const br=$('#beat-ring'); br.style.width=dia+'px'; br.style.height=dia+'px';
+    const near=Math.abs(dia-TARGET)<GUARD_TOL;
+    br.classList.toggle('danger', dia>TARGET+GUARD_TOL);       // still incoming -> red
+    $('#ring-target').classList.toggle('parryzone', Math.abs(dia-TARGET)<PARRY_TOL);
+    if(iv.t>=1.06) resolveBeat('miss');
+  }
+  // single tap: outcome by timing only (no button choice)
+  function tapJudge(){
+    const iv=state.iv; if(!iv||!iv.awaiting||iv.gap>0||iv.done) return;
+    const dia=RING_START-(RING_START-RING_END)*iv.t;
+    const err=Math.abs(dia-TARGET);
+    let out = err<PARRY_TOL?'parry' : (err<GUARD_TOL?'guard':'miss');
+    resolveBeat(out);
+  }
+  function resolveBeat(out){
+    const iv=state.iv; if(!iv||iv.done||!iv.awaiting) return;
+    iv.awaiting=false; iv.results.push(out);
+    if(out==='parry'){ setPose('parry_release'); fireFlash('parry-flash'); shake(false); brace(); callout('parry','PARRY','촤앙!'); }
+    else if(out==='guard'){ setPose('heavy_block'); fireFlash('guard-flash'); shake(false); brace(); callout('guard','GUARD','쿠웅!'); }
+    else { setPose('miss_recover'); fireFlash('hit-flash'); shake(true); hurt(); callout('miss','MISS','—'); }
+    iv.idx++;
+    if(iv.idx<iv.beats){ iv.gap=560; $('#beat-ring').style.width=RING_START+'px'; $('#beat-ring').style.height=RING_START+'px'; }
+    else { iv.done=true; setTimeout(finishIntervene,1100); }
+  }
+  function aggregate(r){
+    if(r.every(x=>x==='parry')) return r.length>1?'parry_perfect':'parry';
+    const miss=r.filter(x=>x==='miss').length;
+    if(miss>=Math.ceil(r.length/2)) return 'miss';
+    if(r.includes('parry')&&miss===0) return 'parry';
+    return 'guard';
+  }
+  function finishIntervene(){
+    const iv=state.iv; const f=front(iv.frontId); const outcome=aggregate(iv.results);
+    if(outcome==='parry_perfect'){ fireFlash('finish-flash'); shake(true); callout('parry','PERFECT!','팜! 팜! 팜!');
+      f.threat=clamp(f.threat-48); f.hp=clamp(f.hp+14); state.omen=clamp(state.omen-12); }
+    else if(outcome==='parry'){ f.threat=clamp(f.threat-34); f.hp=clamp(f.hp+7); state.omen=clamp(state.omen-8); }
+    else if(outcome==='guard'){ f.threat=clamp(f.threat-16); f.hp=clamp(f.hp+1); state.omen=clamp(state.omen-3); }
+    else { f.hp=clamp(f.hp-19); f.threat=clamp(f.threat+15); state.omen=clamp(state.omen+13); }
+    state.interveneCount++;
+    setTimeout(()=>{
+      showScreen('observe'); state.screen='observe'; state.selectedId=null;
+      state.fronts.forEach(renderLane); renderTop(); laneBurst(f.id,outcome); state.iv=null;
+      if(!state.omenDone&&state.interveneCount>=3) triggerOmen();
+    }, outcome==='parry_perfect'?900:650);
+  }
+
+  // ---------- FX ----------
+  function callout(k,big,sm){ const c=$('#iv-callout'); c.className='iv-callout '+k; c.innerHTML=`${big}<small>${sm}</small>`; void c.offsetWidth; c.classList.add('pop'); }
+  function fireFlash(cls){ const fl=$('#iv-flash'); fl.className='flash '+cls; void fl.offsetWidth; fl.classList.add('fire'); }
+  function shake(hard){ const st=$('#stage'); st.classList.remove('shake','shake-hard'); void st.offsetWidth; st.classList.add(hard?'shake-hard':'shake'); }
+  function brace(){ const p=$('#iv-player'); p.classList.remove('brace'); void p.offsetWidth; p.classList.add('brace'); }
+  function hurt(){ const p=$('#iv-player'); p.classList.remove('hurt'); void p.offsetWidth; p.classList.add('hurt'); }
+  function laneBurst(id,outcome){
+    const e=laneEls[id]; if(!e) return;
+    const map={parry:['parry','PARRY ✦'],parry_perfect:['parry','PERFECT ✦'],guard:['guard','GUARD'],miss:['miss','MISS']};
+    const [cls,txt]=map[outcome]||map.guard;
+    e.burst.className='lane-burst '+cls; e.burstB.textContent=txt; void e.burst.offsetWidth; e.burst.classList.add('show');
+    if(outcome==='miss'){ e.root.classList.remove('shakeit'); void e.root.offsetWidth; e.root.classList.add('shakeit'); }
+    else if(e.foeFront){ e.foeFront.classList.remove('hitflash'); void e.foeFront.offsetWidth; e.foeFront.classList.add('hitflash'); }
+  }
+
+  // ---------- boss omen ----------
+  function triggerOmen(){
+    if(state.omenDone) return;
+    state.omenDone=true; state.omen=100;
+    if(state.screen==='observe') renderTop();
+    $('#stage').classList.add('shake-hard');
+    Object.values(laneEls).forEach(e=>e.root.classList.add('shakeit'));
+    setTimeout(()=>$('#omen-overlay').classList.add('show'),240);
+  }
+
+  function showScreen(name){
+    ['title','observe','intervene'].forEach(s=>$('#s-'+s).classList.toggle('active',s===name));
+    $('.fab-wrap').style.display = name==='title' ? 'none' : 'flex';   // keep key-art title clean
+  }
+
+  function startGame(){
+    state.fronts=freshFronts();
+    state.selectedId=null; state.interveneCount=0; state.omen=0; state.omenDone=false; state.iv=null;
+    buildLanes(); state.fronts.forEach(renderLane); renderTop();
+    $('#omen-overlay').classList.remove('show');
+    state.screen='observe'; showScreen('observe');
+  }
+  function fullReset(){ $('#omen-overlay').classList.remove('show'); state.screen='title'; showScreen('title'); }
+
+  // ---------- wire ----------
+  $('#s-title').addEventListener('click', startGame);
+  $('#s-intervene').addEventListener('click', tapJudge);
+  $('#btn-omen-ack').addEventListener('click', ()=>{ $('#omen-overlay').classList.remove('show'); state.screen='observe'; showScreen('observe'); state.fronts.forEach(renderLane); });
+  $('#fab-reset').addEventListener('click', (e)=>{ e.stopPropagation(); fullReset(); });
+  $('#fab-omen').addEventListener('click', (e)=>{ e.stopPropagation(); if(state.screen!=='title') triggerOmen(); });
+
+  // dev-only inspection hook (no gameplay change; used for smoke verification)
+  window.__QV={ state, front, enterIntervene,
+    forceBeat(errPx){ const iv=state.iv; if(!iv) return 'no-iv';
+      const dia=TARGET+(errPx||0); iv.t=(RING_START-dia)/(RING_START-RING_END); iv.awaiting=true; iv.gap=0;
+      tapJudge(); return {results:iv.results.slice(), idx:iv.idx, done:iv.done}; } };
+
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

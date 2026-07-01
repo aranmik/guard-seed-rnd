@@ -1,0 +1,18 @@
+# --- Guard Seed R&D — 배포 제외 ---
+# 원본 입력 자산 백업(대용량 마젠타 원본·첨부 노트) — 배포/추적 제외
+_incoming/
+
+# 로그 / 임시 / 캐시
+*.log
+.cache/
+tmp/
+temp/
+
+# OS 부산물
+.DS_Store
+Thumbs.db
+
+# 툴/에디터 개인 환경
+node_modules/
+.claude/
+*.bak
