@@ -147,6 +147,42 @@
   .iv-player.swing{animation:feverSwing .16s ease-out;}
   @keyframes feverSwing{0%{transform:translateX(-50%) scale(1)}45%{transform:translateX(-50%) scale(1.07) rotate(2deg)}100%{transform:translateX(-50%) scale(1)}}
 
+  /* ---- 01F: boss event duel (ogre 1:1) ---- */
+  .iv-boss{position:absolute;right:-5%;bottom:27%;height:47%;z-index:3;transform:scaleX(-1);
+    filter:drop-shadow(0 14px 18px rgba(0,0,0,.7));opacity:0;pointer-events:none;}
+  #s-intervene.boss-mode .iv-boss{opacity:1;}
+  #s-intervene.boss-mode .iv-top{display:none;}
+  .iv-boss.enter{animation:bossEnter .55s cubic-bezier(.2,.8,.3,1);}
+  @keyframes bossEnter{0%{transform:scaleX(-1) translateX(-46px) translateY(-16px) scale(1.08);opacity:0}100%{transform:scaleX(-1);opacity:1}}
+  .iv-boss.b-stagger{animation:bStagger .6s ease-in-out infinite;}
+  @keyframes bStagger{0%,100%{transform:scaleX(-1) rotate(0)}50%{transform:scaleX(-1) rotate(-3deg) translateY(4px)}}
+  .iv-boss.b-wind{animation:bWind .45s ease-in;}
+  @keyframes bWind{0%{transform:scaleX(-1)}55%{transform:scaleX(-1) translateX(-15px) translateY(-7px) scale(1.05)}100%{transform:scaleX(-1) translateX(-8px)}}
+  .iv-boss.b-strike{animation:bStrike .4s ease-out;}
+  @keyframes bStrike{0%{transform:scaleX(-1) translateX(-10px)}35%{transform:scaleX(-1) translateX(36px) scale(1.06)}100%{transform:scaleX(-1)}}
+  .iv-boss.b-recoil{animation:bRecoil .5s ease-out;}
+  @keyframes bRecoil{0%{transform:scaleX(-1)}30%{transform:scaleX(-1) translateX(-30px) rotate(3deg);
+    filter:drop-shadow(0 14px 18px rgba(0,0,0,.7)) brightness(2.1)}100%{transform:scaleX(-1)}}
+  .iv-boss.b-hit{animation:bHit .18s ease-out;}
+  @keyframes bHit{0%{transform:scaleX(-1)}45%{transform:scaleX(-1) translateX(-13px) rotate(2.5deg);
+    filter:drop-shadow(0 14px 18px rgba(0,0,0,.7)) brightness(1.9)}100%{transform:scaleX(-1)}}
+
+  .boss-head{position:absolute;top:0;left:0;right:0;z-index:6;padding:11px 14px;display:none;}
+  #s-intervene.boss-mode .boss-head{display:block;}
+  .bh-tag{font-size:9px;letter-spacing:.3em;color:#ff8f8f;font-weight:800;animation:tapFade 1.4s ease-in-out infinite;}
+  .bh-name{font-size:17px;font-weight:900;color:#ffe9e9;text-shadow:0 0 16px rgba(255,60,60,.55),0 2px 4px #000;margin-top:2px;}
+  .bh-pattern{font-size:9px;letter-spacing:.16em;color:#ffcf9a;margin-top:2px;font-weight:700;}
+  .bh-menace{margin-top:8px;}
+  .g-menace i{background:linear-gradient(90deg,#7a2a8a,#ff5a5a);}
+
+  .beat-ring.big{border-width:9px;border-color:#ffb04a;
+    box-shadow:0 0 44px #ff7b2a,inset 0 0 22px rgba(255,170,90,.55);}
+  .slash{position:absolute;left:50%;top:50%;width:230px;height:5px;z-index:8;pointer-events:none;opacity:0;
+    background:linear-gradient(90deg,transparent,#fff 32%,#c9f6ff 62%,transparent);border-radius:5px;}
+  .slash.go{animation:slashGo .22s ease-out;}
+  @keyframes slashGo{0%{opacity:0;transform:translate(-72%,-50%) rotate(var(--sa,0deg)) scaleX(.4)}
+    28%{opacity:1}100%{opacity:0;transform:translate(-28%,-50%) rotate(var(--sa,0deg)) scaleX(1.18)}}
+
   .ring-hub{position:absolute;left:50%;top:33%;transform:translate(-50%,-50%);z-index:4;width:260px;height:260px;pointer-events:none;transition:opacity .18s;}
   .ring-hub.appear{animation:ringAppear .34s ease-out;}
   @keyframes ringAppear{0%{opacity:0;transform:translate(-50%,-50%) scale(.55)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
@@ -308,7 +344,16 @@
       </div>
     </div>
 
+    <img class="iv-boss" id="iv-boss" src="assets/qv01/enemies/enemy_ogre_idle.png" alt="ogre boss">
     <img class="iv-player" id="iv-player" alt="guard hero">
+    <div class="slash" id="iv-slash"></div>
+
+    <div class="boss-head" id="boss-head">
+      <div class="bh-tag">⚔ BOSS EVENT</div>
+      <div class="bh-name">정예 거대 오우거</div>
+      <div class="bh-pattern" id="bh-pattern"></div>
+      <div class="bh-menace"><div class="g g-menace"><label>위압</label><i id="bh-menace-i"></i><b id="bh-menace-n"></b></div></div>
+    </div>
 
     <div class="ring-hub" id="ring-hub">
       <div class="ring-guard"></div>
@@ -340,6 +385,7 @@
     <div class="omen-scan"></div>
     <div class="omen-next">
       <span>— 보스 개입은 다음 프로토타입에서 —</span>
+      <button class="btn-omen" id="btn-omen-duel" style="margin-bottom:10px;background:rgba(110,20,22,.85);color:#fff;box-shadow:0 0 26px rgba(255,84,66,.55);">⚔ 보스와 맞선다</button><br>
       <button class="btn-omen" id="btn-omen-ack">전선으로 복귀</button>
     </div>
   </div>
@@ -370,6 +416,14 @@
         <button class="dev-snap-add" id="dev-snap-add">★ 이 값 좋음 — 스냅샷 저장</button>
         <div id="snap-list"></div>
       </div>
+      <div class="dev-rec">
+        <div class="dp-h">BOSS DUEL TEST</div>
+        <div class="dev-rec-btns">
+          <button id="dev-duel-a">⚔ Duel A 팡팡…팡!</button>
+          <button id="dev-duel-b">⚔ Duel B 파파파팡!</button>
+          <button id="dev-chance" style="flex:1 1 100%">★ Force Chance Test</button>
+        </div>
+      </div>
       <div class="dev-presets" id="dev-presets"></div>
     </div>
     <button class="dev-reset" id="dev-reset">Reset Feel Defaults</button>
@@ -396,7 +450,23 @@
   };
   const deep=o=>JSON.parse(JSON.stringify(o));
   const PATTERN_PROFILES=deep(PATTERN_DEFAULTS);
-  const af=()=>PATTERN_PROFILES[state.activeKey]||PATTERN_PROFILES.goblin;
+  // 01F: boss/event-only patterns — per-beat schedule (irregular rhythm), not part of lane presets.
+  const BOSS_DEFAULTS={
+    A:{ label:'BOSS·A', name:'정예 거대 오우거', style:'팡팡…팡!', ringStyleKey:'heavy',
+        parryWindow:26, guardWindow:80, poseHold:720, hitstop:110, inputCooldown:40, screenShake:1.5,
+        feverDuration:2000, ringSpeed:1500, hitCount:3, interval:600, introDelay:520,
+        schedule:[ {dur:880,delayBefore:0,big:false},{dur:880,delayBefore:240,big:false},
+                   {dur:1500,delayBefore:1000,big:true} ] },
+    B:{ label:'BOSS·B', name:'정예 거대 오우거', style:'파파파파파팡!', ringStyleKey:'heavy',
+        parryWindow:22, guardWindow:64, poseHold:720, hitstop:30, inputCooldown:0, screenShake:1.15,
+        feverDuration:2400, ringSpeed:1250, hitCount:7, interval:200, introDelay:560,
+        schedule:[ {dur:620,delayBefore:0},{dur:620,delayBefore:200},{dur:620,delayBefore:200},
+                   {dur:620,delayBefore:200},{dur:620,delayBefore:200},{dur:620,delayBefore:200},
+                   {dur:1250,delayBefore:820,big:true} ] }
+  };
+  const BOSS_PATTERNS=JSON.parse(JSON.stringify(BOSS_DEFAULTS));
+  // feel source: boss duel → boss pattern, otherwise lane's active monster pattern
+  const af=()=> (state.boss&&state.boss.P) ? state.boss.P : (PATTERN_PROFILES[state.activeKey]||PATTERN_PROFILES.goblin);
   let devForceFever=false;
 
   const DEV_OPTS=[
@@ -424,7 +494,7 @@
     ];
   }
 
-  const state={ screen:'title', fronts:[], selectedId:null, interveneCount:0, omen:0, omenDone:false, iv:null, fever:null, activeKey:'goblin' };
+  const state={ screen:'title', fronts:[], selectedId:null, interveneCount:0, omen:0, omenDone:false, iv:null, fever:null, activeKey:'goblin', boss:null };
   const laneEls={};
   const allySrc=(j,p)=>`${A}allies/ally_${j}_${p}.png`;
   const foeSrc=(j,p)=>`${A}enemies/enemy_${j}_${p}.png`;
@@ -526,7 +596,7 @@
         const hot=state.fronts.filter(f=>f.threat>=82).length;
         state.omen=clamp(state.omen+dt*(1.1+hot*1.6));
         if(state.screen==='observe') renderTop();
-        if(state.omen>=100||state.fronts.some(f=>f.threat>=96)) triggerOmen();
+        if(!state.boss && (state.omen>=100||state.fronts.some(f=>f.threat>=96))) triggerOmen();
       }
       if(state.screen==='observe'){ clashAcc+=dt; if(clashAcc>0.5){ clashAcc=0; doClash(); } }
       if(state.screen==='intervene'&&state.iv){
@@ -563,10 +633,11 @@
 
   function enterIntervene(id){
     const f=front(id); state.selectedId=id; state.screen='intervene'; state.fever=null;
+    state.boss=null; $('#s-intervene').classList.remove('boss-mode');   // normal lane duel
     state.activeKey=f.foes[0];               // pattern = lane's lead monster
     const P=af();
     state.iv={ frontId:id, patternKey:state.activeKey, beats:P.hitCount, idx:0, results:[],
-      phase:'intro', introLeft:P.introDelay, t:0, dur:P.ringSpeed, gap:0, awaiting:false, done:false, bossEvent:false };
+      phase:'intro', introLeft:P.introDelay, t:0, dur:P.ringSpeed, gap:0, awaiting:false, done:false, bossEvent:false, schedule:null };
     $('#iv-bg').style.backgroundImage=`url('${A}backgrounds/${f.bg}.png')`;
     $('#iv-name').innerHTML=`${f.name}<small>${f.sub}</small>`;
     $('#iv-pattern').textContent=`${P.label} · ${P.style}`;
@@ -581,13 +652,40 @@
     syncDev();
     showScreen('intervene');
   }
+  // 01F: boss event duel — repeatable test stage (omen button / DEV buttons)
+  function enterBossDuel(pk){
+    const BP=BOSS_PATTERNS[pk]; if(!BP) return;
+    $('#omen-overlay').classList.remove('show'); closeDev();
+    state.screen='intervene'; state.selectedId=null; state.fever=null;
+    state.boss={ patternKey:pk, P:BP, menace:100 };
+    state.iv={ frontId:null, patternKey:'boss_'+pk, beats:BP.schedule.length, idx:0, results:[],
+      phase:'intro', introLeft:BP.introDelay, t:0, dur:BP.schedule[0].dur, gap:0, awaiting:false, done:false,
+      bossEvent:true, schedule:BP.schedule };
+    $('#iv-bg').style.backgroundImage=`url('${A}backgrounds/boss_duel_gate_bg.png')`;
+    const sc=$('#s-intervene'); sc.classList.add('boss-mode','intro-on'); sc.classList.remove('fever-on');
+    $('#fever').classList.remove('show');
+    $('#ring-hub').className='ring-hub style-'+BP.ringStyleKey;
+    $('#bh-pattern').textContent='PATTERN — '+BP.style;
+    renderMenace();
+    setPose('dash_land');
+    const pl=$('#iv-player'); pl.className='iv-player'; void pl.offsetWidth; pl.classList.add('enter');
+    const bs=$('#iv-boss'); bs.className='iv-boss'; void bs.offsetWidth; bs.classList.add('enter');
+    $('#iv-hint').className='iv-hint'; $('#iv-hint').innerHTML='보스가 다가온다…';
+    syncDev();
+    showScreen('intervene');
+  }
+  function renderMenace(){
+    const m=state.boss?state.boss.menace:0;
+    $('#bh-menace-i').style.width=clamp(m)+'%'; $('#bh-menace-n').textContent=Math.round(m);
+  }
   function beginBeats(){
     const iv=state.iv; if(!iv) return;
     iv.phase='beat';
     const sc=$('#s-intervene'); sc.classList.remove('intro-on');
     const rh=$('#ring-hub'); rh.classList.remove('appear'); void rh.offsetWidth; rh.classList.add('appear');
     $('#iv-hint').className='iv-hint beat';
-    $('#iv-hint').innerHTML= iv.beats>1 ? `<b>${iv.beats}연타</b> — 수렴마다 <b>탭</b>` : `수렴 순간에 <b>탭</b>해 막아라`;
+    $('#iv-hint').innerHTML= state.boss ? `<b>${af().style}</b> — 리듬을 읽어라`
+      : (iv.beats>1 ? `<b>${iv.beats}연타</b> — 수렴마다 <b>탭</b>` : `수렴 순간에 <b>탭</b>해 막아라`);
     startBeat();
   }
   function setPose(p){ $('#iv-player').src=`${A}player/player_guard_${p}.png`; }
@@ -596,11 +694,16 @@
     $('#iv-th').style.width=f.threat+'%'; $('#iv-th-n').textContent=Math.round(f.threat);
   }
   function startBeat(){
-    const iv=state.iv; iv.t=0; iv.awaiting=true; iv.gap=0; iv.dur=af().ringSpeed;
+    const iv=state.iv; iv.t=0; iv.awaiting=true; iv.gap=0;
+    const sch=iv.schedule?iv.schedule[iv.idx]:null;
+    iv.dur=sch?sch.dur:af().ringSpeed;               // boss: per-beat schedule / lane: live slider value
+    iv.big=!!(sch&&sch.big);
     const pl=$('#iv-player'); pl.classList.remove('enter'); setPose('dash_land');
     $('#beat-count').textContent= iv.beats>1 ? `접점 ${iv.idx+1} / ${iv.beats}` : '';
     $('#ring-target').classList.remove('parryzone');
-    const br=$('#beat-ring'); br.classList.remove('danger');
+    const br=$('#beat-ring'); br.classList.remove('danger'); br.classList.toggle('big', iv.big);
+    if(state.boss){ const bs=$('#iv-boss'); bs.classList.remove('b-wind','b-strike','b-recoil'); void bs.offsetWidth; bs.classList.add('b-wind'); }
+    if(iv.big){ $('#iv-hint').className='iv-hint beat'; $('#iv-hint').innerHTML='⚠ <b>마지막 강타!</b>'; }
   }
   function beatStep(dt){
     const iv=state.iv; if(!iv||iv.done) return;
@@ -634,8 +737,15 @@
     if(out==='parry'){ setPose('parry_release'); fireFlash('parry-flash'); shake(false); brace(); callout('parry','PARRY','촤앙!'); }
     else if(out==='guard'){ setPose('heavy_block'); fireFlash('guard-flash'); shake(false); brace(); callout('guard','GUARD','쿠웅!'); }
     else { setPose('miss_recover'); fireFlash('hit-flash'); shake(true); hurt(); callout('miss','MISS','—'); }
+    if(state.boss){ const bs=$('#iv-boss'); bs.classList.remove('b-wind','b-strike','b-recoil'); void bs.offsetWidth;
+      bs.classList.add(out==='miss'?'b-strike':'b-recoil'); }
     iv.idx++;
-    if(iv.idx<iv.beats){ iv.gap=af().interval+af().hitstop; $('#beat-ring').style.width=RING_START+'px'; $('#beat-ring').style.height=RING_START+'px'; }
+    if(iv.idx<iv.beats){
+      const nsch=iv.schedule?iv.schedule[iv.idx]:null;
+      iv.gap=(nsch?nsch.delayBefore:af().interval)+af().hitstop;
+      $('#beat-ring').style.width=RING_START+'px'; $('#beat-ring').style.height=RING_START+'px';
+      if(nsch&&nsch.big){ $('#iv-hint').className='iv-hint'; $('#iv-hint').innerHTML='…크게 온다'; }
+    }
     else { iv.done=true; setTimeout(finishIntervene, af().poseHold); }
   }
   function aggregate(r){
@@ -659,7 +769,30 @@
     else { setPose('miss_recover'); shake(true); emote('아쉽다…','lose'); }
   }
   function finishIntervene(){
-    const iv=state.iv; const f=front(iv.frontId); const outcome=aggregate(iv.results);
+    const iv=state.iv; const outcome=aggregate(iv.results);
+    // boss duel: CHANCE only when EVERY beat was parried (guard is not enough)
+    if(state.boss){
+      iv.phase='result';
+      const allParry=iv.results.every(x=>x==='parry');
+      if(!allParry){
+        if(outcome==='parry') state.boss.menace=clamp(state.boss.menace-8);
+        else if(outcome==='guard') state.boss.menace=clamp(state.boss.menace-5);
+        else state.boss.menace=clamp(state.boss.menace+8);
+        renderMenace();
+      }
+      const feverOK=allParry||(devForceFever&&(outcome==='parry'||outcome==='parry_perfect'));
+      if(feverOK){
+        fireFlash('finish-flash'); shake(true); callout('parry','PERFECT!','전부 흘려냈다!');
+        const bs=$('#iv-boss'); bs.classList.remove('b-strike','b-recoil'); void bs.offsetWidth; bs.classList.add('b-stagger');
+        setTimeout(()=>enterFever(null,'boss'), RESULT_HOLD);
+      } else {
+        if(outcome==='miss'){ setPose('miss_recover'); shake(true); emote('오우거의 위압에 밀렸다…','lose'); }
+        else { setPose('heavy_block'); emote('버텼다… 하지만 찬스는 아니다','lose'); }
+        setTimeout(()=>returnToObserve(null,outcome,0), RESULT_HOLD+320);
+      }
+      return;
+    }
+    const f=front(iv.frontId);
     applyOutcome(f,outcome);
     state.interveneCount++;
     iv.phase='result';
@@ -670,18 +803,26 @@
 
   // ---------- Parry Fever (boss/event only; dev Force Fever for testing) ----------
   function enterFever(f,outcome){
-    const dur=(outcome==='parry_perfect'?af().feverDuration*1.3:af().feverDuration);
-    state.fever={ front:f, outcome, taps:0, dur, start:performance.now() };
-    $('#fever-title').textContent = outcome==='parry_perfect' ? '나의 찬스다!!!!' : 'CHANCE!';
+    const isBoss=(outcome==='boss');
+    const dur=af().feverDuration*((outcome==='parry_perfect'||isBoss)?1.3:1);
+    state.fever={ front:f, outcome:isBoss?'parry_perfect':outcome, taps:0, dur, start:performance.now(), boss:isBoss };
+    $('#fever-title').textContent = (isBoss||outcome==='parry_perfect') ? '나의 찬스다!!!!' : 'CHANCE!';
     $('#fever-count').textContent='COUNTER 0'; $('#fever-bar').style.width='100%';
     $('#fever').classList.add('show'); $('#s-intervene').classList.add('fever-on');
-    $('#iv-hint').className='iv-hint beat'; $('#iv-hint').innerHTML='<b>탭! 탭! 탭!</b>';
+    $('#iv-hint').className='iv-hint beat'; $('#iv-hint').innerHTML='<b>탭! 탭! 탭!</b> 검을 휘둘러라!';
     setPose('parry_release'); $('#iv-player').classList.add('fever');
+  }
+  function slashFx(){
+    const s=$('#iv-slash'); s.style.setProperty('--sa',(Math.random()*70-40).toFixed(0)+'deg');
+    s.classList.remove('go'); void s.offsetWidth; s.classList.add('go');
   }
   function counterTap(){
     const fv=state.fever; if(!fv) return;
     fv.taps++; $('#fever-count').textContent='COUNTER '+fv.taps;
+    setPose(fv.taps%2 ? 'parry_release' : 'dash_land');   // sword flurry: alternate poses
     const p=$('#iv-player'); p.classList.remove('swing'); void p.offsetWidth; p.classList.add('swing');
+    slashFx();
+    if(state.boss){ const bs=$('#iv-boss'); bs.classList.remove('b-hit'); void bs.offsetWidth; bs.classList.add('b-hit'); }
     if(fv.taps%4===0){ fireFlash('parry-flash'); shake(false); }
   }
   function feverTick(now){
@@ -693,20 +834,37 @@
   function endFever(){
     const fv=state.fever; if(!fv) return;
     const f=fv.front, taps=fv.taps;
-    f.threat=clamp(f.threat - Math.min(taps,20)*(fv.outcome==='parry_perfect'?2.4:2.0));
-    state.omen=clamp(state.omen - taps*0.3);
     $('#iv-player').classList.remove('fever','swing');
     $('#fever').classList.remove('show'); $('#s-intervene').classList.remove('fever-on');
     state.fever=null;
+    if(fv.boss&&state.boss){
+      // boss duel: counter taps carve the boss menace gauge
+      state.boss.menace=clamp(state.boss.menace-(15+Math.min(taps,25)*2.5));
+      renderMenace();
+      const broke=state.boss.menace<=0;
+      const bs=$('#iv-boss'); bs.classList.remove('b-stagger','b-hit'); void bs.offsetWidth;
+      bs.classList.add(broke?'b-strike':'b-recoil');
+      fireFlash(broke?'finish-flash':'parry-flash'); shake(true);
+      callout('parry',`COUNTER × ${taps}`, broke?'BREAK!':'밀어냈다!');
+      setPose('victory_stand'); win(); emote(broke?'오우거가 크게 휘청인다!':'한 페이즈를 넘겼다!','win');
+      setTimeout(()=>returnToObserve(null,'parry_perfect',taps), 950);
+      return;
+    }
+    f.threat=clamp(f.threat - Math.min(taps,20)*(fv.outcome==='parry_perfect'?2.4:2.0));
+    state.omen=clamp(state.omen - taps*0.3);
     returnToObserve(f, fv.outcome, taps);
   }
 
   function returnToObserve(f, outcome, counterTaps){
+    const wasBoss=!!state.boss;
+    state.boss=null;
+    const sc=$('#s-intervene'); sc.classList.remove('boss-mode','intro-on','fever-on');
+    $('#iv-boss').className='iv-boss'; $('#beat-ring').classList.remove('big');
     showScreen('observe'); state.screen='observe'; state.selectedId=null;
     state.fronts.forEach(renderLane); renderTop();
-    laneBurst(f.id, outcome, counterTaps);      // ONLY this lane reacts
+    if(f) laneBurst(f.id, outcome, counterTaps);      // ONLY this lane reacts (boss duel has no lane)
     state.iv=null;
-    if(!state.omenDone && state.interveneCount>=3) triggerOmen();
+    if(!wasBoss && !state.omenDone && state.interveneCount>=3) triggerOmen();
   }
 
   // ---------- FX ----------
@@ -749,8 +907,17 @@
     $('#omen-overlay').classList.remove('show');
     state.screen='observe'; showScreen('observe');
   }
-  function fullReset(){ $('#omen-overlay').classList.remove('show'); state.fever=null; state.iv=null;
-    $('#s-intervene').classList.remove('intro-on','fever-on'); state.screen='title'; showScreen('title'); }
+  function fullReset(){ $('#omen-overlay').classList.remove('show'); state.fever=null; state.iv=null; state.boss=null;
+    $('#s-intervene').classList.remove('intro-on','fever-on','boss-mode'); $('#iv-boss').className='iv-boss';
+    state.screen='title'; showScreen('title'); }
+  // DEV: jump straight into the boss CHANCE fever (tuning aid)
+  function forceChance(){
+    if(!state.boss) enterBossDuel('A');
+    const iv=state.iv; if(iv){ iv.phase='result'; iv.done=true; iv.awaiting=false; }
+    $('#s-intervene').classList.remove('intro-on');
+    const bs=$('#iv-boss'); bs.classList.remove('b-wind'); void bs.offsetWidth; bs.classList.add('b-stagger');
+    enterFever(null,'boss');
+  }
 
   // ---------- Dev panel (edits the ACTIVE pattern; presets read-only) ----------
   function fmtFeel(o,v){ return (o.step<1?Number(v).toFixed(2):Math.round(v))+o.u; }
@@ -783,6 +950,7 @@
   function openDev(){ $('#dev-panel').classList.add('show'); }
   function closeDev(){ $('#dev-panel').classList.remove('show'); }
   function resetFeel(){ ['ogre','goblin','orc_mage'].forEach(k=>Object.assign(PATTERN_PROFILES[k],deep(PATTERN_DEFAULTS[k])));
+    ['A','B'].forEach(k=>Object.assign(BOSS_PATTERNS[k],deep(BOSS_DEFAULTS[k])));
     $('#stage').style.setProperty('--shk',af().screenShake); syncDev(); }
 
   // ---- 01E: feel tuning recorder (copy / temp save / snapshots) — records feel, never changes gameplay ----
@@ -847,6 +1015,10 @@
   $('#s-title').addEventListener('click', startGame);
   $('#s-intervene').addEventListener('click', onIvTap);
   $('#btn-omen-ack').addEventListener('click', ()=>{ $('#omen-overlay').classList.remove('show'); state.screen='observe'; showScreen('observe'); state.fronts.forEach(renderLane); });
+  $('#btn-omen-duel').addEventListener('click', ()=>enterBossDuel('A'));
+  $('#dev-duel-a').addEventListener('click', ()=>enterBossDuel('A'));
+  $('#dev-duel-b').addEventListener('click', ()=>enterBossDuel('B'));
+  $('#dev-chance').addEventListener('click', forceChance);
   $('#fab-reset').addEventListener('click', (e)=>{ e.stopPropagation(); fullReset(); });
   $('#fab-omen').addEventListener('click', (e)=>{ e.stopPropagation(); if(state.screen!=='title') triggerOmen(); });
   $('#fab-dev').addEventListener('click', (e)=>{ e.stopPropagation(); $('#dev-panel').classList.toggle('show'); });
@@ -874,6 +1046,7 @@
     setForceFever(v){ devForceFever=!!v; $('#dev-fever').checked=devForceFever; },
     resetFeel, af,
     presetText, saveWorking, loadWorking, addSnap, applySnap, getSnaps, LS_WORK, LS_SNAPS,
+    BOSS_PATTERNS, BOSS_DEFAULTS, enterBossDuel, forceChance, get boss(){return state.boss;},
     enterIntervene, skipIntro(){ if(state.iv&&state.iv.phase==='intro'){ state.iv.introLeft=0; beginBeats(); } },
     forceBeat(errPx){ const iv=state.iv; if(!iv) return 'no-iv'; if(iv.phase==='intro') this.skipIntro();
       const dia=TARGET+(errPx||0); iv.t=(RING_START-dia)/(RING_START-RING_END); iv.awaiting=true; iv.gap=0;
