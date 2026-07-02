@@ -19,7 +19,13 @@
   레이어로 둘 다 노출 / 고블린 단독 전선은 3기 스태거 / 사제를 옆·위로 빼 시인성 확보),
   **FEEL Dev 패널(⚙)** — Ring Speed/Parry·Guard Window/Pose Hold/Hitstop/Input Lock/Screen Shake/Fever Duration
   슬라이더(세션 전용·저장 안 함)로 손맛 실시간 튜닝, **Parry Fever** — 패링 성공 시 "CHANCE!/나의 찬스다!!!!"
-  피버 진입 → 화면 연타 = COUNTER, 선택 전선 위협도 추가 감소 → `COUNTER × N` 반영(Guard/Miss는 피버 없음).
+  피버 진입 → 화면 연타 = COUNTER, 선택 전선 위협도 추가 감소 → `COUNTER × N` 반영.
+- **01D**: **몬스터별 패턴 프로파일**(ogre=HEAVY 1500ms/2연타/강쉐이크, goblin=RAPID 820ms/4연타/약쉐이크,
+  orc_mage=CAST 1180ms/3연타/좁은 패링 — 전장 대표 몬스터가 개입 손맛 결정), FEEL DEV가 **현재 개입 패턴을
+  편집**하고 3패턴 프리셋 표시, **Fever는 보스/이벤트 전용으로 게이팅**(일반전 OFF, DEV "Force Fever Test"로만 확인),
+  **2.5D 전장 배치**(앞 크게·낮게 / 뒤 작게·높게, 캐릭터가 하단 게이지 위로 — 평평한 일렬 제거),
+  **개입 인트로 호흡**(캐릭터 등장·안착 → 링 등장 → 판정 시작), **결과 감정 연출**(성공=승리 포즈 "막아냈다!" /
+  실패=miss recover "아쉬다…") 후 복귀, 결과·burst는 선택 전선에만, 아군/몬스터 스프라이트 활용 확대.
 
 ## 폴더 구조
 

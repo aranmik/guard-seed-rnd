@@ -5,86 +5,69 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>GUARD SEED — Quarterview R&amp;D 01</title>
 <!--
-  Guard Seed × Quarterview R&D 01 (pass 01C) — quarterview01_guard_intervention_proto.html
+  Guard Seed × Quarterview R&D 01 (pass 01D) — quarterview01_guard_intervention_proto.html
   C7 (seed02c7_triple_guard_finish_polish.html) is reference-only and NOT touched.
-  Loop: Title(key art, STILL) → 3-front observe (mobile-fixed, no scroll, no system panel)
-        → tap select / re-tap dive → shield intervention (ME only, tap-timing Guard/Parry/Miss)
-        → PARRY → "CHANCE!" fever mash → result returns to the SELECTED front → boss omen(key art).
-  01C adds: mobile 100dvh fit + scroll lock, foe layer/count/size cleanup, priest visibility,
-            FEEL Dev panel (⚙, session-only sliders), Parry Fever prototype.
-  Bodies via assets/qv01/ (relative PNG, incl. sheet-extracted idle/act frames). FX = CSS/SVG.
-  No external CDN/URL/library.
+  Loop: Title(key art) → 3-front observe (mobile-fixed, 2.5D staged) → tap select / re-tap dive
+        → intervention: character enters → ring appears → per-MONSTER-pattern beats (Guard/Parry/Miss)
+        → result emotion pose → result returns to the SELECTED front only → boss omen.
+  01D adds: per-monster pattern profiles (ogre/goblin/orc_mage feel), FEEL DEV = active-pattern editor
+            + presets, Fever gated to boss/event only (+ dev Force Fever), 2.5D lane staging,
+            intervention intro pacing, single-lane result isolation + result-hold, sprite variety.
+  Bodies via assets/qv01/ (relative PNG). FX = CSS/SVG. No external CDN/URL/library.
 -->
 <style>
   :root{
-    --gold:#e7c15a; --gold-soft:#c9a94a;
-    --cyan:#7fe3ff; --cyan-hot:#c9f6ff;
-    --hp1:#4fd18a; --hp2:#2f9d6a;
-    --th1:#ffb454; --th2:#e5473f;
-    --danger:#ff5442;
-    --txt:#e9edf6; --txt-dim:#9aa4bd;
+    --gold:#e7c15a; --cyan:#7fe3ff; --cyan-hot:#c9f6ff;
+    --hp1:#4fd18a; --hp2:#2f9d6a; --th1:#ffb454; --th2:#e5473f;
+    --danger:#ff5442; --txt:#e9edf6; --txt-dim:#9aa4bd;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  /* 01C: lock the page to the viewport — no body scroll / rubber-band / swipe-slide */
   html,body{margin:0;height:100%;background:#05060a;color:var(--txt);overflow:hidden;
     overscroll-behavior:none;font-family:"Segoe UI",-apple-system,"Malgun Gothic",system-ui,sans-serif;}
   body{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;touch-action:none;}
-
-  /* 01C: stage fills the phone screen height exactly (dvh + --vh fallback), fixed */
   #stage{position:relative; width:min(100vw,430px);
     height:calc(var(--vh,1vh) * 100); height:100dvh; max-height:100dvh;
-    overflow:hidden; background:#05060a; user-select:none; touch-action:manipulation;
-    --shk:0.85;}
-
+    overflow:hidden; background:#05060a; user-select:none; touch-action:manipulation; --shk:0.85;}
   .screen{position:absolute; inset:0; display:none; flex-direction:column;}
   .screen.active{display:flex;}
 
-  /* ===================== TITLE (key art — STILL, no zoom) ===================== */
-  #s-title{cursor:pointer;
-    background:center/cover no-repeat url('assets/qv01/ui/guardseed_title.png');
-    background-color:#05060a;}
+  /* ===================== TITLE ===================== */
+  #s-title{cursor:pointer;background:center/cover no-repeat url('assets/qv01/ui/guardseed_title.png');background-color:#05060a;}
   .title-tap{position:absolute;left:0;right:0;bottom:9%;z-index:3;text-align:center;
     font-size:11px;letter-spacing:.34em;color:#ffe9b8;text-transform:uppercase;
-    text-shadow:0 0 12px rgba(231,193,90,.7),0 2px 4px #000;pointer-events:none;
-    animation:tapFade 1.6s ease-in-out infinite;}
-  @keyframes tapFade{0%,100%{opacity:.4}50%{opacity:1}}   /* opacity only — no scale/translate */
-  .title-glow{position:absolute;left:50%;bottom:5%;transform:translateX(-50%);z-index:2;
-    width:260px;height:110px;pointer-events:none;
-    background:radial-gradient(50% 60% at 50% 50%,rgba(231,193,90,.26),transparent 70%);
-    animation:tapFade 1.6s ease-in-out infinite;}
+    text-shadow:0 0 12px rgba(231,193,90,.7),0 2px 4px #000;pointer-events:none;animation:tapFade 1.6s ease-in-out infinite;}
+  @keyframes tapFade{0%,100%{opacity:.4}50%{opacity:1}}
+  .title-glow{position:absolute;left:50%;bottom:5%;transform:translateX(-50%);z-index:2;width:260px;height:110px;pointer-events:none;
+    background:radial-gradient(50% 60% at 50% 50%,rgba(231,193,90,.26),transparent 70%);animation:tapFade 1.6s ease-in-out infinite;}
 
-  /* ===================== OBSERVE (battlefield-first) ===================== */
+  /* ===================== OBSERVE ===================== */
   #s-observe{background:#070911;}
-  .topbar{padding:9px 13px 8px;flex:0 0 auto;
-    background:linear-gradient(180deg,rgba(20,26,45,.96),rgba(12,15,26,.9));
+  .topbar{padding:9px 13px 8px;flex:0 0 auto;background:linear-gradient(180deg,rgba(20,26,45,.96),rgba(12,15,26,.9));
     border-bottom:1px solid rgba(60,70,110,.5);z-index:6;}
   .topbar-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
   .campaign{font-size:12px;letter-spacing:.18em;color:var(--gold);font-weight:800;text-transform:uppercase;}
   .campaign small{display:block;font-size:8.5px;letter-spacing:.14em;color:var(--txt-dim);font-weight:500;margin-top:1px;}
   .war-stat{font-size:10px;color:var(--txt-dim);text-align:right;}
   .war-stat b{color:#e9edf6;font-size:12px;}
-  .omen-bar{position:relative;height:11px;border-radius:8px;background:#0a0c14;
-    border:1px solid #34263a;overflow:hidden;}
-  .omen-bar i{position:absolute;inset:0;width:0%;
-    background:linear-gradient(90deg,#6a2540,#b23a4e 55%,#ff5a5a);
+  .omen-bar{position:relative;height:11px;border-radius:8px;background:#0a0c14;border:1px solid #34263a;overflow:hidden;}
+  .omen-bar i{position:absolute;inset:0;width:0%;background:linear-gradient(90deg,#6a2540,#b23a4e 55%,#ff5a5a);
     box-shadow:0 0 12px rgba(255,90,90,.5);transition:width .25s;}
   .omen-bar span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     font-size:8px;letter-spacing:.24em;color:#ffd7d7;text-shadow:0 1px 2px #000;font-weight:700;}
 
   .lanes{flex:1 1 auto;display:flex;flex-direction:column;gap:2px;overflow:hidden;min-height:0;}
-  .lane{position:relative;flex:1 1 0;min-height:0;overflow:hidden;cursor:pointer;
-    border-top:1px solid rgba(0,0,0,.5);transition:transform .1s;}
+  .lane{position:relative;flex:1 1 0;min-height:0;overflow:hidden;cursor:pointer;border-top:1px solid rgba(0,0,0,.5);transition:transform .1s;}
   .lane:active{transform:scale(.995);}
-  .lane-bg{position:absolute;inset:0;background-size:cover;background-position:center 36%;transform:scale(1.04);}
+  .lane-bg{position:absolute;inset:0;background-size:cover;background-position:center 34%;transform:scale(1.04);}
+  /* 2.5D ground haze — a soft trapezoid floor cue so actors don't look flat-lined */
   .lane-veil{position:absolute;inset:0;
-    background:linear-gradient(180deg,rgba(6,8,14,.12),rgba(6,8,14,.03) 40%,rgba(6,8,14,.66));}
+    background:radial-gradient(120% 62% at 50% 118%,rgba(10,14,24,.0),rgba(6,8,14,.5) 70%),
+      linear-gradient(180deg,rgba(6,8,14,.12),rgba(6,8,14,.03) 40%,rgba(6,8,14,.64));}
   .lane-actors{position:absolute;inset:0;}
-  .actor{position:absolute;bottom:2%;filter:drop-shadow(0 6px 6px rgba(0,0,0,.55));
-    transform-origin:bottom center;pointer-events:none;height:60%;}
-  .actor.ally{left:4%;z-index:3;}
-  .actor.ally.a-front{animation:bobA 2.7s ease-in-out infinite;}
-  /* 01C: back ally (e.g. priest) pulled aside + up + a touch bigger so it isn't buried behind the warrior */
-  .actor.ally.back{left:25%;bottom:7%;height:57%;z-index:2;opacity:.97;animation:bobA 3.1s ease-in-out infinite .5s;}
+  .actor{position:absolute;filter:drop-shadow(0 5px 5px rgba(0,0,0,.55));transform-origin:bottom center;pointer-events:none;}
+  /* 2.5D allies: front bigger/lower/left, back smaller/higher/inset */
+  .actor.ally.a-front{left:4%;bottom:14%;height:56%;z-index:5;animation:bobA 2.7s ease-in-out infinite;}
+  .actor.ally.back{left:25%;bottom:20%;height:46%;z-index:3;opacity:.95;animation:bobA 3.1s ease-in-out infinite .5s;}
   .actor.foe{transform:scaleX(-1);}
   .actor.foe.fb0{animation:bobB 2.6s ease-in-out infinite;}
   .actor.foe.fb1{animation:bobB 2.95s ease-in-out infinite;}
@@ -92,43 +75,36 @@
   @keyframes bobA{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
   @keyframes bobB{0%,100%{transform:scaleX(-1) translateY(0)}50%{transform:scaleX(-1) translateY(-2px)}}
   .actor.ally.lunge{animation:lungeA .32s ease-out;}
-  @keyframes lungeA{0%{transform:translateX(0)}42%{transform:translateX(15px)}100%{transform:translateX(0)}}
-  .actor.foe.lunge{animation:lungeB .32s ease-out;}   /* after fbN → overrides bob during lunge */
-  @keyframes lungeB{0%{transform:scaleX(-1) translateX(0)}42%{transform:scaleX(-1) translateX(15px)}100%{transform:scaleX(-1) translateX(0)}}
+  @keyframes lungeA{0%{transform:translateX(0)}42%{transform:translateX(14px)}100%{transform:translateX(0)}}
+  .actor.foe.lunge{animation:lungeB .32s ease-out;}
+  @keyframes lungeB{0%{transform:scaleX(-1) translateX(0)}42%{transform:scaleX(-1) translateX(14px)}100%{transform:scaleX(-1) translateX(0)}}
   .actor.hitflash{animation:hitflash .3s ease-out;}
-  @keyframes hitflash{0%,100%{filter:drop-shadow(0 6px 6px rgba(0,0,0,.55))}
-    35%{filter:drop-shadow(0 6px 6px rgba(0,0,0,.55)) brightness(2.4) saturate(.4)}}
+  @keyframes hitflash{0%,100%{filter:drop-shadow(0 5px 5px rgba(0,0,0,.55))}
+    35%{filter:drop-shadow(0 5px 5px rgba(0,0,0,.55)) brightness(2.4) saturate(.4)}}
 
-  .lane-top{position:absolute;top:0;left:0;right:0;padding:6px 8px;display:flex;
-    align-items:flex-start;justify-content:space-between;z-index:5;}
+  .lane-top{position:absolute;top:0;left:0;right:0;padding:6px 8px;display:flex;align-items:flex-start;justify-content:space-between;z-index:5;}
   .lane-name{font-size:11px;font-weight:800;color:#fff;text-shadow:0 1px 3px #000,0 0 8px rgba(0,0,0,.6);}
   .lane-name small{display:block;font-size:8px;font-weight:600;letter-spacing:.14em;color:#c7cfe4;opacity:.85;}
-  .danger-badge{font-size:8px;font-weight:800;letter-spacing:.1em;padding:3px 7px;border-radius:20px;
-    text-transform:uppercase;border:1px solid transparent;backdrop-filter:blur(2px);}
+  .danger-badge{font-size:8px;font-weight:800;letter-spacing:.1em;padding:3px 7px;border-radius:20px;text-transform:uppercase;border:1px solid transparent;backdrop-filter:blur(2px);}
   .danger-badge.normal{color:#bfe9cf;background:rgba(30,70,50,.5);border-color:#3f7d5c;}
   .danger-badge.heavy{color:#ffe0b0;background:rgba(90,60,20,.5);border-color:#c79a4c;}
   .danger-badge.triple{color:#ffd0c8;background:rgba(90,30,25,.55);border-color:#d76a5c;}
   .danger-badge.crit{color:#fff;background:rgba(150,25,25,.72);border-color:#ff5442;animation:critBadge .7s ease-in-out infinite;}
   @keyframes critBadge{0%,100%{box-shadow:0 0 0 rgba(255,84,66,0)}50%{box-shadow:0 0 14px rgba(255,84,66,.85)}}
 
-  .lane-gauges{position:absolute;left:8px;right:8px;bottom:7px;z-index:5;display:flex;flex-direction:column;gap:4px;}
-  .g{position:relative;height:9px;border-radius:6px;background:rgba(6,8,14,.72);
-    border:1px solid rgba(255,255,255,.1);overflow:hidden;}
+  .lane-gauges{position:absolute;left:8px;right:8px;bottom:7px;z-index:7;display:flex;flex-direction:column;gap:4px;}
+  .g{position:relative;height:9px;border-radius:6px;background:rgba(6,8,14,.8);border:1px solid rgba(255,255,255,.1);overflow:hidden;}
   .g i{position:absolute;left:0;top:0;bottom:0;transition:width .3s;}
   .g-hp i{background:linear-gradient(90deg,var(--hp2),var(--hp1));}
   .g-threat i{background:linear-gradient(90deg,var(--th1),var(--th2));}
-  .g label{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-size:7px;letter-spacing:.14em;
-    font-weight:800;color:rgba(255,255,255,.92);text-shadow:0 1px 1px rgba(0,0,0,.8);z-index:2;}
-  .g b{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:7.5px;font-weight:800;
-    color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.8);z-index:2;}
+  .g label{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-size:7px;letter-spacing:.14em;font-weight:800;color:rgba(255,255,255,.92);text-shadow:0 1px 1px rgba(0,0,0,.8);z-index:2;}
+  .g b{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:7.5px;font-weight:800;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.8);z-index:2;}
 
-  .sel-ring{position:absolute;inset:0;pointer-events:none;z-index:6;opacity:0;
-    border:2px solid var(--gold);box-shadow:inset 0 0 22px rgba(231,193,90,.3);}
+  .sel-ring{position:absolute;inset:0;pointer-events:none;z-index:6;opacity:0;border:2px solid var(--gold);box-shadow:inset 0 0 22px rgba(231,193,90,.3);}
   .lane.selected .sel-ring{opacity:1;animation:selRing 1.5s ease-in-out infinite;}
   @keyframes selRing{0%,100%{box-shadow:inset 0 0 14px rgba(231,193,90,.24)}50%{box-shadow:inset 0 0 32px rgba(231,193,90,.55)}}
-  .dive-hint{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);z-index:7;opacity:0;
-    padding:5px 13px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.06em;
-    color:#22190a;background:linear-gradient(180deg,#f7e4a4,#e7c15a);white-space:nowrap;
+  .dive-hint{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);z-index:8;opacity:0;padding:5px 13px;border-radius:20px;
+    font-size:10px;font-weight:800;letter-spacing:.06em;color:#22190a;background:linear-gradient(180deg,#f7e4a4,#e7c15a);white-space:nowrap;
     box-shadow:0 4px 14px rgba(231,193,90,.45);pointer-events:none;}
   .lane.selected .dive-hint{opacity:1;animation:diveHint 1.2s ease-in-out infinite;}
   @keyframes diveHint{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-3px)}}
@@ -139,7 +115,7 @@
   .lane.shakeit .lane-actors{animation:laneShake .34s ease-in-out;}
   @keyframes laneShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}60%{transform:translateX(3px)}}
 
-  .lane-burst{position:absolute;inset:0;z-index:8;pointer-events:none;display:flex;align-items:center;justify-content:center;opacity:0;}
+  .lane-burst{position:absolute;inset:0;z-index:9;pointer-events:none;display:flex;align-items:center;justify-content:center;opacity:0;}
   .lane-burst.show{animation:burst 1.2s ease-out;}
   @keyframes burst{0%{opacity:0;transform:scale(.6)}18%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.12)}}
   .lane-burst b{font-size:23px;font-weight:900;text-shadow:0 2px 10px #000;text-align:center;}
@@ -147,53 +123,63 @@
   .lane-burst.guard b{color:#ffe1a8;text-shadow:0 0 16px #d9a53e,0 2px 6px #000;}
   .lane-burst.miss b{color:#ff8b7e;text-shadow:0 0 16px #e5473f,0 2px 6px #000;}
 
-  /* ===================== INTERVENE (ME only) ===================== */
+  /* ===================== INTERVENE ===================== */
   #s-intervene{background:#04050a;cursor:pointer;}
-  .iv-bg{position:absolute;inset:0;background-size:cover;background-position:center 42%;
-    transform:scale(1.14);filter:brightness(.5) saturate(.9) blur(2px);}
-  .iv-veil{position:absolute;inset:0;
-    background:radial-gradient(70% 55% at 50% 58%,transparent 22%,rgba(3,4,9,.86) 100%),
+  .iv-bg{position:absolute;inset:0;background-size:cover;background-position:center 42%;transform:scale(1.14);filter:brightness(.5) saturate(.9) blur(2px);}
+  .iv-veil{position:absolute;inset:0;background:radial-gradient(70% 55% at 50% 58%,transparent 22%,rgba(3,4,9,.86) 100%),
       linear-gradient(180deg,rgba(3,4,9,.7),rgba(3,4,9,.25) 42%,rgba(3,4,9,.94));}
   .iv-top{position:absolute;top:0;left:0;right:0;z-index:6;padding:12px 14px;}
   .iv-top .lane-name{font-size:14px;}
+  .iv-pattern{margin-top:3px;font-size:9px;letter-spacing:.16em;color:var(--cyan);font-weight:700;opacity:.9;text-transform:uppercase;}
   .iv-mini-g{margin-top:8px;display:flex;flex-direction:column;gap:5px;}
 
-  .iv-player{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);height:45%;z-index:5;
-    filter:drop-shadow(0 12px 14px rgba(0,0,0,.65));transition:transform .16s;}
+  .iv-player{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);height:45%;z-index:5;filter:drop-shadow(0 12px 14px rgba(0,0,0,.65));transition:transform .16s;}
+  .iv-player.enter{animation:ivEnter .42s cubic-bezier(.2,.8,.3,1);}
+  @keyframes ivEnter{0%{transform:translateX(-50%) translateY(46px) scale(.9);opacity:0}55%{opacity:1}100%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}}
   .iv-player.hurt{animation:plHurt .42s ease-out;}
   @keyframes plHurt{0%,100%{transform:translateX(-50%)}30%{transform:translateX(calc(-50% - 12px)) rotate(-3deg)}}
   .iv-player.brace{animation:plBrace .4s ease-out;}
   @keyframes plBrace{0%,100%{transform:translateX(-50%)}40%{transform:translateX(-50%) scale(1.04)}}
+  .iv-player.win{animation:plWin .5s ease-out;}
+  @keyframes plWin{0%{transform:translateX(-50%) scale(1)}40%{transform:translateX(-50%) translateY(-8px) scale(1.06)}100%{transform:translateX(-50%) scale(1.03)}}
   .iv-player.fever{animation:feverIdle .5s ease-in-out infinite;}
   @keyframes feverIdle{0%,100%{transform:translateX(-50%) rotate(-1.5deg)}50%{transform:translateX(-50%) rotate(1.5deg)}}
   .iv-player.swing{animation:feverSwing .16s ease-out;}
   @keyframes feverSwing{0%{transform:translateX(-50%) scale(1)}45%{transform:translateX(-50%) scale(1.07) rotate(2deg)}100%{transform:translateX(-50%) scale(1)}}
 
-  .ring-hub{position:absolute;left:50%;top:33%;transform:translate(-50%,-50%);z-index:4;
-    width:260px;height:260px;pointer-events:none;transition:opacity .2s;}
+  .ring-hub{position:absolute;left:50%;top:33%;transform:translate(-50%,-50%);z-index:4;width:260px;height:260px;pointer-events:none;transition:opacity .18s;}
+  .ring-hub.appear{animation:ringAppear .34s ease-out;}
+  @keyframes ringAppear{0%{opacity:0;transform:translate(-50%,-50%) scale(.55)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
   .ring-guard,.ring-target,.beat-ring{position:absolute;left:50%;top:50%;border-radius:50%;transform:translate(-50%,-50%);}
   .ring-guard{width:190px;height:190px;border:2px dashed rgba(150,175,215,.35);}
-  .ring-target{width:120px;height:120px;border:3px solid rgba(231,225,168,.65);
-    box-shadow:0 0 22px rgba(231,193,90,.28),inset 0 0 18px rgba(255,255,255,.12);}
+  .ring-target{width:120px;height:120px;border:3px solid rgba(231,225,168,.65);box-shadow:0 0 22px rgba(231,193,90,.28),inset 0 0 18px rgba(255,255,255,.12);}
   .ring-target.parryzone{border-color:var(--cyan);box-shadow:0 0 30px var(--cyan),inset 0 0 20px rgba(127,227,255,.45);}
-  .beat-ring{width:120px;height:120px;border:5px solid var(--cyan-hot);
-    box-shadow:0 0 26px var(--cyan),inset 0 0 16px rgba(201,246,255,.5);opacity:.96;}
+  /* ring style per pattern (visual identity cue) */
+  .ring-hub.style-heavy .ring-target{border-width:5px;border-color:rgba(255,190,120,.7);}
+  .ring-hub.style-rapid .ring-guard{border-style:dotted;}
+  .ring-hub.style-cast .ring-guard{border-color:rgba(190,150,255,.45);}
+  .beat-ring{width:120px;height:120px;border:5px solid var(--cyan-hot);box-shadow:0 0 26px var(--cyan),inset 0 0 16px rgba(201,246,255,.5);opacity:.96;}
+  .ring-hub.style-heavy .beat-ring{border-color:#ffd9a8;box-shadow:0 0 28px #ffb060,inset 0 0 16px rgba(255,200,150,.5);}
+  .ring-hub.style-cast .beat-ring{border-color:#d8c0ff;box-shadow:0 0 28px #a97fff,inset 0 0 16px rgba(200,170,255,.5);}
   .beat-ring.danger{border-color:#ff6a5a;box-shadow:0 0 26px #ff5442,inset 0 0 16px rgba(255,120,100,.5);}
-  .ring-core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;
-    background:radial-gradient(circle,#fff,#7fe3ff);box-shadow:0 0 16px var(--cyan);}
-  .beat-count{position:absolute;left:50%;top:calc(33% + 132px);transform:translateX(-50%);z-index:6;
-    font-size:11px;letter-spacing:.2em;color:#cfe8ff;font-weight:700;text-shadow:0 1px 4px #000;transition:opacity .2s;}
-  #s-intervene.fever-on .ring-hub, #s-intervene.fever-on #beat-count{opacity:0;}
+  .ring-core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#fff,#7fe3ff);box-shadow:0 0 16px var(--cyan);}
+  .beat-count{position:absolute;left:50%;top:calc(33% + 132px);transform:translateX(-50%);z-index:6;font-size:11px;letter-spacing:.2em;color:#cfe8ff;font-weight:700;text-shadow:0 1px 4px #000;transition:opacity .18s;}
+  #s-intervene.intro-on .ring-hub,#s-intervene.intro-on #beat-count,
+  #s-intervene.fever-on .ring-hub,#s-intervene.fever-on #beat-count{opacity:0;}
 
-  .iv-callout{position:absolute;left:50%;top:20%;transform:translate(-50%,-50%);z-index:8;
-    font-size:42px;font-weight:900;pointer-events:none;opacity:0;text-align:center;}
+  .iv-callout{position:absolute;left:50%;top:20%;transform:translate(-50%,-50%);z-index:8;font-size:42px;font-weight:900;pointer-events:none;opacity:0;text-align:center;}
   .iv-callout.pop{animation:callPop .8s ease-out;}
-  @keyframes callPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}
-    22%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-58%) scale(1)}}
+  @keyframes callPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}22%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-58%) scale(1)}}
   .iv-callout.parry{color:var(--cyan-hot);text-shadow:0 0 24px var(--cyan),0 0 6px #fff;}
   .iv-callout.guard{color:#ffe1a8;text-shadow:0 0 20px #d9a53e,0 2px 4px #000;}
   .iv-callout.miss{color:#ff8b7e;text-shadow:0 0 20px #e5473f,0 2px 4px #000;}
   .iv-callout small{display:block;font-size:13px;letter-spacing:.28em;margin-top:2px;font-weight:800;}
+
+  .iv-emote{position:absolute;left:0;right:0;top:62%;text-align:center;z-index:8;font-size:20px;font-weight:900;opacity:0;pointer-events:none;text-shadow:0 2px 8px #000;}
+  .iv-emote.pop{animation:emotePop 1s ease-out;}
+  @keyframes emotePop{0%{opacity:0;transform:translateY(8px)}20%{opacity:1;transform:translateY(0)}80%{opacity:1}100%{opacity:0}}
+  .iv-emote.win{color:#d7ffe6;text-shadow:0 0 16px var(--cyan),0 2px 6px #000;}
+  .iv-emote.lose{color:#ffb9ae;text-shadow:0 0 14px #e5473f,0 2px 6px #000;}
 
   .flash{position:absolute;inset:0;z-index:7;pointer-events:none;opacity:0;}
   .flash.parry-flash{background:radial-gradient(60% 50% at 50% 48%,rgba(201,246,255,.95),rgba(127,227,255,.2) 45%,transparent 70%);}
@@ -203,104 +189,81 @@
   .flash.fire{animation:flashFire .5s ease-out;}
   @keyframes flashFire{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
 
-  .iv-hint{position:absolute;bottom:15px;left:0;right:0;z-index:8;text-align:center;
-    font-size:13px;color:#dbe6fb;letter-spacing:.04em;pointer-events:none;text-shadow:0 1px 6px #000;}
+  .iv-hint{position:absolute;bottom:15px;left:0;right:0;z-index:8;text-align:center;font-size:13px;color:#dbe6fb;letter-spacing:.04em;pointer-events:none;text-shadow:0 1px 6px #000;}
   .iv-hint b{color:var(--cyan);}
   .iv-hint.beat{animation:hintPulse 1s ease-in-out infinite;}
   @keyframes hintPulse{0%,100%{opacity:.7}50%{opacity:1}}
 
-  /* ---- Parry Fever ("나의 찬스다!") ---- */
+  /* Parry Fever */
   #fever{position:absolute;inset:0;z-index:9;display:none;pointer-events:none;}
   #fever.show{display:block;}
-  .fever-veil{position:absolute;inset:0;
-    background:radial-gradient(72% 62% at 50% 56%,rgba(255,240,180,.30),rgba(127,227,255,.15) 45%,transparent 76%);
-    animation:feverVeil .5s ease-in-out infinite;}
+  .fever-veil{position:absolute;inset:0;background:radial-gradient(72% 62% at 50% 56%,rgba(255,240,180,.30),rgba(127,227,255,.15) 45%,transparent 76%);animation:feverVeil .5s ease-in-out infinite;}
   @keyframes feverVeil{0%,100%{opacity:.7}50%{opacity:1}}
-  .fever-rays{position:absolute;inset:0;
-    background:repeating-conic-gradient(from 0deg at 50% 46%,rgba(255,255,255,.05) 0deg 6deg,transparent 6deg 14deg);
-    animation:feverRays 6s linear infinite;}
+  .fever-rays{position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 50% 46%,rgba(255,255,255,.05) 0deg 6deg,transparent 6deg 14deg);animation:feverRays 6s linear infinite;}
   @keyframes feverRays{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-  .fever-title{position:absolute;left:0;right:0;top:14%;text-align:center;z-index:2;
-    font-size:32px;font-weight:900;color:#fff;
-    text-shadow:0 0 22px var(--cyan),0 0 10px #ffe9b8,0 2px 6px #000;
-    animation:feverTitle .4s ease-in-out infinite;}
+  .fever-title{position:absolute;left:0;right:0;top:14%;text-align:center;z-index:2;font-size:32px;font-weight:900;color:#fff;text-shadow:0 0 22px var(--cyan),0 0 10px #ffe9b8,0 2px 6px #000;animation:feverTitle .4s ease-in-out infinite;}
   @keyframes feverTitle{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-  .fever-count{position:absolute;left:0;right:0;top:25%;text-align:center;z-index:2;
-    font-size:17px;font-weight:800;letter-spacing:.14em;color:var(--cyan-hot);text-shadow:0 0 12px var(--cyan),0 2px 4px #000;}
-  .fever-bar-wrap{position:absolute;left:16%;right:16%;top:calc(25% + 32px);height:8px;border-radius:6px;
-    background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.22);overflow:hidden;z-index:2;}
-  .fever-bar{position:absolute;left:0;top:0;bottom:0;width:100%;
-    background:linear-gradient(90deg,#ffe9b8,#7fe3ff);}
+  .fever-count{position:absolute;left:0;right:0;top:25%;text-align:center;z-index:2;font-size:17px;font-weight:800;letter-spacing:.14em;color:var(--cyan-hot);text-shadow:0 0 12px var(--cyan),0 2px 4px #000;}
+  .fever-bar-wrap{position:absolute;left:16%;right:16%;top:calc(25% + 32px);height:8px;border-radius:6px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.22);overflow:hidden;z-index:2;}
+  .fever-bar{position:absolute;left:0;top:0;bottom:0;width:100%;background:linear-gradient(90deg,#ffe9b8,#7fe3ff);}
 
   #stage.shake{animation:stageShake .32s ease-in-out;}
-  @keyframes stageShake{0%,100%{transform:translate(0,0)}
-    20%{transform:translate(calc(-5px*var(--shk)),calc(3px*var(--shk)))}
-    45%{transform:translate(calc(4px*var(--shk)),calc(-3px*var(--shk)))}
-    70%{transform:translate(calc(-3px*var(--shk)),calc(2px*var(--shk)))}}
+  @keyframes stageShake{0%,100%{transform:translate(0,0)}20%{transform:translate(calc(-5px*var(--shk)),calc(3px*var(--shk)))}45%{transform:translate(calc(4px*var(--shk)),calc(-3px*var(--shk)))}70%{transform:translate(calc(-3px*var(--shk)),calc(2px*var(--shk)))}}
   #stage.shake-hard{animation:stageShakeHard .5s ease-in-out;}
-  @keyframes stageShakeHard{0%,100%{transform:translate(0,0)}
-    15%{transform:translate(calc(-9px*var(--shk)),calc(5px*var(--shk)))}
-    35%{transform:translate(calc(8px*var(--shk)),calc(-5px*var(--shk)))}
-    55%{transform:translate(calc(-7px*var(--shk)),calc(4px*var(--shk)))}
-    80%{transform:translate(calc(5px*var(--shk)),calc(-3px*var(--shk)))}}
+  @keyframes stageShakeHard{0%,100%{transform:translate(0,0)}15%{transform:translate(calc(-9px*var(--shk)),calc(5px*var(--shk)))}35%{transform:translate(calc(8px*var(--shk)),calc(-5px*var(--shk)))}55%{transform:translate(calc(-7px*var(--shk)),calc(4px*var(--shk)))}80%{transform:translate(calc(5px*var(--shk)),calc(-3px*var(--shk)))}}
 
-  /* ===================== BOSS OMEN (key art) ===================== */
+  /* ===================== BOSS OMEN ===================== */
   #omen-overlay{position:absolute;inset:0;z-index:40;display:none;align-items:flex-end;justify-content:center;background:#04040a;}
   #omen-overlay.show{display:flex;animation:omenIn .9s ease-out;}
   @keyframes omenIn{0%{opacity:0}100%{opacity:1}}
   .omen-art{position:absolute;inset:0;background:center/cover no-repeat url('assets/qv01/ui/guardseed_boss.png');}
-  .omen-red{position:absolute;inset:0;pointer-events:none;
-    background:radial-gradient(80% 60% at 50% 45%,transparent 40%,rgba(120,0,0,.5) 100%);
-    animation:omenRed 1.4s ease-in-out infinite;}
+  .omen-red{position:absolute;inset:0;pointer-events:none;background:radial-gradient(80% 60% at 50% 45%,transparent 40%,rgba(120,0,0,.5) 100%);animation:omenRed 1.4s ease-in-out infinite;}
   @keyframes omenRed{0%,100%{opacity:.55}50%{opacity:1}}
-  .omen-scan{position:absolute;inset:0;pointer-events:none;
-    background:repeating-linear-gradient(180deg,rgba(255,0,0,.05) 0 2px,transparent 2px 5px);}
+  .omen-scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(180deg,rgba(255,0,0,.05) 0 2px,transparent 2px 5px);}
   .omen-next{position:relative;z-index:5;margin-bottom:9%;text-align:center;}
-  .omen-next span{display:block;font-size:10px;letter-spacing:.2em;color:#ff9a9a;text-transform:uppercase;
-    margin-bottom:12px;text-shadow:0 2px 6px #000;animation:tapFade 1.6s ease-in-out infinite;}
-  .btn-omen{padding:13px 40px;border:1px solid #ff5442;border-radius:40px;background:rgba(60,10,12,.7);
-    color:#ffdada;font-weight:800;letter-spacing:.2em;font-size:12px;cursor:pointer;
-    box-shadow:0 0 20px rgba(255,84,66,.35);backdrop-filter:blur(2px);}
+  .omen-next span{display:block;font-size:10px;letter-spacing:.2em;color:#ff9a9a;text-transform:uppercase;margin-bottom:12px;text-shadow:0 2px 6px #000;animation:tapFade 1.6s ease-in-out infinite;}
+  .btn-omen{padding:13px 40px;border:1px solid #ff5442;border-radius:40px;background:rgba(60,10,12,.7);color:#ffdada;font-weight:800;letter-spacing:.2em;font-size:12px;cursor:pointer;box-shadow:0 0 20px rgba(255,84,66,.35);backdrop-filter:blur(2px);}
 
   /* ===================== FAB + DEV PANEL ===================== */
   .fab-wrap{position:absolute;top:8px;right:8px;z-index:50;display:none;gap:6px;}
-  .fab{width:28px;height:28px;border-radius:50%;border:1px solid rgba(60,70,110,.6);
-    background:rgba(20,24,39,.8);color:#aeb7d0;font-size:12px;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
+  .fab{width:28px;height:28px;border-radius:50%;border:1px solid rgba(60,70,110,.6);background:rgba(20,24,39,.8);color:#aeb7d0;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
   .fab:active{transform:scale(.9);}
   .fab.dbg{font-size:8.5px;width:auto;padding:0 8px;border-radius:16px;}
   .fab.gear{color:#cfe8ff;border-color:rgba(127,227,255,.4);}
-
-  #dev-panel{position:absolute;top:42px;right:8px;z-index:60;width:236px;display:none;
-    background:rgba(12,16,27,.96);border:1px solid rgba(90,110,160,.5);border-radius:12px;
-    box-shadow:0 12px 40px rgba(0,0,0,.7);backdrop-filter:blur(4px);overflow:hidden;}
+  #dev-panel{position:absolute;top:42px;right:8px;z-index:60;width:242px;display:none;background:rgba(12,16,27,.96);border:1px solid rgba(90,110,160,.5);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.7);backdrop-filter:blur(4px);overflow:hidden;}
   #dev-panel.show{display:block;}
-  .dev-head{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;
-    font-size:11px;letter-spacing:.16em;font-weight:800;color:var(--cyan);
-    border-bottom:1px solid rgba(90,110,160,.35);background:rgba(20,26,45,.7);}
+  .dev-head{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;font-size:11px;letter-spacing:.16em;font-weight:800;color:var(--cyan);border-bottom:1px solid rgba(90,110,160,.35);background:rgba(20,26,45,.7);}
   .dev-head button{background:none;border:none;color:#9aa4bd;font-size:14px;cursor:pointer;padding:0 2px;}
-  .dev-scroll{max-height:calc(var(--vh,1vh) * 62);overflow-y:auto;padding:8px 11px 4px;touch-action:pan-y;}
-  .dev-row{margin-bottom:11px;}
-  .dev-row .dr-top{display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:#c7cfe4;margin-bottom:4px;}
+  .dev-scroll{max-height:calc(var(--vh,1vh) * 64);overflow-y:auto;padding:8px 11px 4px;touch-action:pan-y;}
+  .dev-pattern{font-size:10px;font-weight:800;letter-spacing:.08em;color:#ffe1a8;margin-bottom:8px;padding:6px 8px;border-radius:7px;background:rgba(90,70,20,.28);border:1px solid rgba(201,169,74,.35);}
+  .dev-pattern em{color:var(--cyan-hot);font-style:normal;}
+  .dev-pattern span{display:block;color:#9aa4bd;font-weight:600;letter-spacing:.04em;margin-top:2px;font-size:8.5px;}
+  .dev-row{margin-bottom:10px;}
+  .dev-row .dr-top{display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:#c7cfe4;margin-bottom:3px;}
   .dev-row .dr-top em{color:var(--cyan-hot);font-style:normal;font-weight:800;}
   .dev-row input[type=range]{width:100%;height:22px;accent-color:#7fe3ff;cursor:pointer;}
-  .dev-row .dr-note{font-size:8px;color:#6f7a96;margin-top:1px;letter-spacing:.02em;}
-  .dev-reset{width:calc(100% - 22px);margin:2px 11px 11px;padding:9px;border:none;border-radius:9px;
-    font-size:11px;font-weight:800;letter-spacing:.1em;color:#22190a;cursor:pointer;
-    background:linear-gradient(180deg,#f7e4a4,#e7c15a);}
-
+  .dev-toggle{margin:6px 0 10px;font-size:10px;color:#dbe6fb;}
+  .dev-toggle label{display:flex;align-items:center;gap:7px;cursor:pointer;}
+  .dev-toggle input{width:15px;height:15px;accent-color:#ff9a5a;}
+  .dev-presets{border-top:1px solid rgba(90,110,160,.3);padding-top:7px;margin-bottom:4px;}
+  .dev-presets .dp-h{font-size:8.5px;letter-spacing:.16em;color:#6f7a96;font-weight:800;margin-bottom:5px;}
+  .dev-presets .dp-row{display:flex;justify-content:space-between;font-size:8.5px;color:#8a93ad;margin-bottom:3px;gap:6px;}
+  .dev-presets .dp-row b{color:#c7cfe4;font-weight:800;flex:0 0 auto;}
+  .dev-presets .dp-row.on{color:var(--cyan-hot);}
+  .dev-presets .dp-row.on b{color:var(--cyan-hot);}
+  .dev-reset{width:calc(100% - 22px);margin:2px 11px 11px;padding:9px;border:none;border-radius:9px;font-size:11px;font-weight:800;letter-spacing:.1em;color:#22190a;cursor:pointer;background:linear-gradient(180deg,#f7e4a4,#e7c15a);}
 </style>
 </head>
 <body>
 <div id="stage">
 
-  <!-- ============ TITLE ============ -->
+  <!-- TITLE -->
   <section id="s-title" class="screen active">
     <div class="title-glow"></div>
     <div class="title-tap">▶ Tap to Start ◀</div>
   </section>
 
-  <!-- ============ OBSERVE ============ -->
+  <!-- OBSERVE -->
   <section id="s-observe" class="screen">
     <div class="topbar">
       <div class="topbar-row">
@@ -312,12 +275,13 @@
     <div class="lanes" id="lanes"></div>
   </section>
 
-  <!-- ============ INTERVENE ============ -->
+  <!-- INTERVENE -->
   <section id="s-intervene" class="screen">
     <div class="iv-bg" id="iv-bg"></div>
     <div class="iv-veil"></div>
     <div class="iv-top">
       <div class="lane-name" id="iv-name">전선</div>
+      <div class="iv-pattern" id="iv-pattern"></div>
       <div class="iv-mini-g">
         <div class="g g-hp"><label>버팀</label><i id="iv-hp"></i><b id="iv-hp-n"></b></div>
         <div class="g g-threat"><label>위협</label><i id="iv-th"></i><b id="iv-th-n"></b></div>
@@ -335,9 +299,9 @@
     <div class="beat-count" id="beat-count"></div>
 
     <div class="iv-callout" id="iv-callout"></div>
+    <div class="iv-emote" id="iv-emote"></div>
     <div class="flash" id="iv-flash"></div>
 
-    <!-- Parry Fever -->
     <div id="fever">
       <div class="fever-veil"></div>
       <div class="fever-rays"></div>
@@ -349,7 +313,7 @@
     <div class="iv-hint" id="iv-hint">화면을 <b>탭</b>해 막아라</div>
   </section>
 
-  <!-- ============ BOSS OMEN ============ -->
+  <!-- BOSS OMEN -->
   <div id="omen-overlay">
     <div class="omen-art"></div>
     <div class="omen-red"></div>
@@ -367,10 +331,15 @@
     <button class="fab" id="fab-reset" title="리셋">↻</button>
   </div>
 
-  <!-- FEEL Dev panel (session-only) -->
+  <!-- FEEL Dev panel -->
   <div id="dev-panel">
     <div class="dev-head"><span>⚙ FEEL DEV</span><button id="dev-close">✕</button></div>
-    <div class="dev-scroll" id="dev-rows"></div>
+    <div class="dev-scroll">
+      <div class="dev-pattern">PATTERN: <em id="dev-pat">—</em><span id="dev-pat-style"></span></div>
+      <div id="dev-rows"></div>
+      <div class="dev-toggle"><label><input type="checkbox" id="dev-fever"> Force Fever Test <span style="color:#6f7a96">(일반전 피버 확인)</span></label></div>
+      <div class="dev-presets" id="dev-presets"></div>
+    </div>
     <button class="dev-reset" id="dev-reset">Reset Feel Defaults</button>
   </div>
 
@@ -383,62 +352,68 @@
   const $=s=>document.querySelector(s);
   const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
 
-  // ---- viewport height fix (mobile browser chrome) ----
   function setVH(){ document.documentElement.style.setProperty('--vh',(window.innerHeight*0.01)+'px'); }
   setVH(); window.addEventListener('resize',setVH); window.addEventListener('orientationchange',setVH);
-  // block page/element scroll via touch, but allow the dev panel to scroll internally
   document.addEventListener('touchmove',function(e){ if(!e.target.closest('.dev-scroll')) e.preventDefault(); },{passive:false});
 
-  // ---- FEEL (Dev-tunable, session only, no storage) ----
-  const FEEL_DEFAULTS={ ringSpeed:1200, parryWindow:26, guardWindow:74, poseHold:750,
-    hitstop:70, inputCooldown:0, screenShake:0.85, feverDuration:1500 };
-  let feel={...FEEL_DEFAULTS};
+  // ---- per-MONSTER pattern profiles (feel identity). FEEL DEV edits the ACTIVE one. ----
+  const PATTERN_DEFAULTS={
+    ogre:    {label:'OGRE',     style:'HEAVY · 묵직·위압',  ringStyleKey:'heavy', ringSpeed:1500, parryWindow:24, guardWindow:82, poseHold:820, hitstop:130, inputCooldown:60, screenShake:1.35, feverDuration:1700, hitCount:2, interval:520, introDelay:440},
+    goblin:  {label:'GOBLIN',   style:'RAPID · 빠른 연타',  ringStyleKey:'rapid', ringSpeed:820,  parryWindow:22, guardWindow:66, poseHold:480, hitstop:40,  inputCooldown:0,  screenShake:0.60, feverDuration:1400, hitCount:4, interval:290, introDelay:300},
+    orc_mage:{label:'ORC MAGE', style:'CAST · 변칙·날카로움',ringStyleKey:'cast',  ringSpeed:1180, parryWindow:18, guardWindow:72, poseHold:700, hitstop:80,  inputCooldown:20, screenShake:0.95, feverDuration:1600, hitCount:3, interval:560, introDelay:640}
+  };
+  const deep=o=>JSON.parse(JSON.stringify(o));
+  const PATTERN_PROFILES=deep(PATTERN_DEFAULTS);
+  const af=()=>PATTERN_PROFILES[state.activeKey]||PATTERN_PROFILES.goblin;
+  let devForceFever=false;
+
   const DEV_OPTS=[
-    {key:'ringSpeed', label:'Ring Speed', min:600, max:2200, step:50, dp:0, note:'수렴 시간(ms) · 낮을수록 빠름'},
-    {key:'parryWindow', label:'Parry Window', min:10, max:60, step:2, dp:0, note:'패링 판정 폭(px)'},
-    {key:'guardWindow', label:'Guard Window', min:34, max:120, step:2, dp:0, note:'가드 판정 폭(px)'},
-    {key:'poseHold', label:'Pose Hold', min:150, max:1400, step:50, dp:0, note:'리액션 포즈 유지(ms)'},
-    {key:'hitstop', label:'Hitstop', min:0, max:400, step:10, dp:0, note:'연타 사이 정지감(ms)'},
-    {key:'inputCooldown', label:'Input Lock', min:0, max:400, step:10, dp:0, note:'탭 후 입력 잠금(ms)'},
-    {key:'screenShake', label:'Screen Shake', min:0, max:2, step:0.05, dp:2, note:'흔들림 강도(×)'},
-    {key:'feverDuration', label:'Fever Duration', min:600, max:3000, step:100, dp:0, note:'피버 지속(ms)'}
+    {key:'ringSpeed', label:'Ring Speed', min:600, max:2200, step:50, u:'ms'},
+    {key:'parryWindow', label:'Parry Window', min:10, max:60, step:2, u:'px'},
+    {key:'guardWindow', label:'Guard Window', min:34, max:120, step:2, u:'px'},
+    {key:'poseHold', label:'Pose Hold', min:150, max:1400, step:50, u:'ms'},
+    {key:'hitstop', label:'Hitstop', min:0, max:400, step:10, u:'ms'},
+    {key:'inputCooldown', label:'Input Lock', min:0, max:400, step:10, u:'ms'},
+    {key:'screenShake', label:'Screen Shake', min:0, max:2, step:0.05, u:'×'},
+    {key:'feverDuration', label:'Fever Duration', min:600, max:3000, step:100, u:'ms'}
   ];
 
-  // per-enemy body scale (goblin small < orc_mage mid < ogre large)
-  const FOE_SIZE={ goblin:0.80, orc_mage:1.02, ogre:1.34 };
-  const FOE_BASE=58;
+  const FOE_SIZE={ goblin:0.82, orc_mage:1.02, ogre:1.34 };
+  const FOE_BASE=52;
 
   function freshFronts(){
     return [
       { id:'north', name:'북쪽 폐허 전선', sub:'BURNING RUINS', bg:'burning_ruins_lane_bg',
         allies:['warrior','priest'], foes:['ogre','goblin'], hp:76, threat:42, danger:'heavy', drift:2.3 },
       { id:'gate', name:'중앙 성문 전선', sub:'BROKEN GATE', bg:'broken_gate_lane_bg',
-        allies:['warrior','archer'], foes:['orc_mage','goblin'], hp:61, threat:68, danger:'triple', drift:3.1 },
+        allies:['archer','mage'], foes:['orc_mage','goblin','goblin'], hp:61, threat:68, danger:'triple', drift:3.1 },
       { id:'woods', name:'남쪽 성벽 전선', sub:'CASTLE WALL', bg:'castle_wall_lane_bg',
-        allies:['archer','mage'], foes:['goblin','goblin','goblin'], hp:84, threat:35, danger:'normal', drift:1.5 }
+        allies:['warrior','archer'], foes:['goblin','goblin','goblin'], hp:84, threat:35, danger:'normal', drift:1.5 }
     ];
   }
 
-  const state={ screen:'title', fronts:[], selectedId:null, interveneCount:0, omen:0, omenDone:false, iv:null, fever:null };
+  const state={ screen:'title', fronts:[], selectedId:null, interveneCount:0, omen:0, omenDone:false, iv:null, fever:null, activeKey:'goblin' };
   const laneEls={};
+  const allySrc=(j,p)=>`${A}allies/ally_${j}_${p}.png`;
+  const foeSrc=(j,p)=>`${A}enemies/enemy_${j}_${p}.png`;
 
-  function allySrc(j,p){ return `${A}allies/ally_${j}_${p}.png`; }
-  function foeSrc(j,p){ return `${A}enemies/enemy_${j}_${p}.png`; }
-
-  // foe layout: biggest goes back/far-right; smaller ones step toward center in FRONT (higher z) so none is buried
+  // 2.5D foe staging: biggest species → back(higher/smaller-persp), others step to front(lower/bigger)
   function foeLayout(foes){
     const arr=foes.map((k,i)=>({k,size:FOE_SIZE[k]||1,ord:i}));
-    arr.sort((a,b)=>b.size-a.size||a.ord-b.ord);   // big → small (stable)
+    arr.sort((a,b)=>b.size-a.size||a.ord-b.ord);
     const n=arr.length;
-    return arr.map((o,i)=>({
-      key:o.k,
-      rightPct:(3+i*14).toFixed(1),   // keep foes on the right, staggered toward center in front
-      bottomPct:(2+i*2).toFixed(1),
-      heightPct:(o.size*FOE_BASE*(1-i*0.07)).toFixed(1),
-      z:3+i,
-      front:i===n-1,
-      fb:Math.min(i,2)
-    }));
+    return arr.map((o,i)=>{
+      const depth = n===1 ? 0.5 : 0.8 - i*(0.6/(n-1));   // 0=front .. 0.8=back
+      return {
+        key:o.k,
+        rightPct:(3+(1-depth)*24).toFixed(1),
+        bottomPct:(14+depth*9).toFixed(1),
+        heightPct:(o.size*FOE_BASE*(1-depth*0.16)).toFixed(1),
+        z:6-Math.round(depth*4),
+        front:i===n-1,
+        fb:Math.min(i,2)
+      };
+    });
   }
 
   function buildLanes(){
@@ -448,8 +423,7 @@
       lane.className='lane'; lane.dataset.id=f.id;
       const foesHtml=foeLayout(f.foes).map(o=>
         `<img class="actor foe fb${o.fb}${o.front?' f-front':''}" style="right:${o.rightPct}%;bottom:${o.bottomPct}%;height:${o.heightPct}%;z-index:${o.z}"
-              data-idle="${foeSrc(o.key,'idle')}" data-act="${foeSrc(o.key,'act')}" src="${foeSrc(o.key,'idle')}">`
-      ).join('');
+              data-idle="${foeSrc(o.key,'idle')}" data-act="${foeSrc(o.key,'act')}" src="${foeSrc(o.key,'idle')}">`).join('');
       lane.innerHTML=`
         <div class="lane-bg" style="background-image:url('${A}backgrounds/${f.bg}.png')"></div>
         <div class="lane-veil"></div>
@@ -472,7 +446,7 @@
         <div class="lane-burst"><b></b></div>`;
       wrap.appendChild(lane);
       laneEls[f.id]={
-        root:lane, actors:lane.querySelector('.lane-actors'),
+        root:lane,
         allyFront:lane.querySelector('.actor.ally.a-front'),
         foeFront:lane.querySelector('.actor.foe.f-front'),
         badge:lane.querySelector('.danger-badge'),
@@ -487,7 +461,6 @@
   function dangerClass(f){ if(f.threat>=88||f.hp<=22) return 'crit'; return f.danger; }
   function dangerLabel(f){ const c=dangerClass(f);
     if(c==='crit')return '⚠ 위험'; if(c==='triple')return '● 3연타'; if(c==='heavy')return '● 격전'; return '○ 안정'; }
-
   function renderLane(f){
     const e=laneEls[f.id]; if(!e) return;
     e.hp.style.width=f.hp+'%'; e.hpN.textContent=Math.round(f.hp);
@@ -512,7 +485,7 @@
     const dt=Math.min(0.05,(now-last)/1000); last=now;
     if(state.screen==='observe'||state.screen==='intervene'){
       state.fronts.forEach(f=>{
-        if(state.iv&&state.iv.frontId===f.id&&state.screen==='intervene') return;
+        if(state.iv&&state.iv.frontId===f.id&&state.screen==='intervene') return;   // frozen while intervening it
         f.threat=clamp(f.threat+f.drift*dt+(Math.random()-0.45)*6*dt);
         if(f.threat>70) f.hp=clamp(f.hp-(f.threat-70)*0.03*dt);
         if(state.screen==='observe') renderLane(f);
@@ -524,7 +497,11 @@
         if(state.omen>=100||state.fronts.some(f=>f.threat>=96)) triggerOmen();
       }
       if(state.screen==='observe'){ clashAcc+=dt; if(clashAcc>0.5){ clashAcc=0; doClash(); } }
-      if(state.screen==='intervene'){ if(state.fever) feverTick(now); else if(state.iv) beatStep(dt); }
+      if(state.screen==='intervene'&&state.iv){
+        if(state.iv.phase==='intro'){ state.iv.introLeft-=dt*1000; if(state.iv.introLeft<=0) beginBeats(); }
+        else if(state.iv.phase==='beat'){ beatStep(dt); }
+      }
+      if(state.screen==='intervene'&&state.fever) feverTick(now);
     }
     requestAnimationFrame(loop);
   }
@@ -549,21 +526,37 @@
   }
 
   // ---------- intervention ----------
-  const RING_START=320, RING_END=42, TARGET=120;
+  const RING_START=320, RING_END=42, TARGET=120, RESULT_HOLD=430;
   let lastTap=0;
 
   function enterIntervene(id){
     const f=front(id); state.selectedId=id; state.screen='intervene'; state.fever=null;
-    const beats=f.danger==='triple'?3:1;
-    state.iv={ frontId:id, beats, idx:0, results:[], t:0, dur:feel.ringSpeed, gap:0, awaiting:true, done:false };
+    state.activeKey=f.foes[0];               // pattern = lane's lead monster
+    const P=af();
+    state.iv={ frontId:id, patternKey:state.activeKey, beats:P.hitCount, idx:0, results:[],
+      phase:'intro', introLeft:P.introDelay, t:0, dur:P.ringSpeed, gap:0, awaiting:false, done:false, bossEvent:false };
     $('#iv-bg').style.backgroundImage=`url('${A}backgrounds/${f.bg}.png')`;
     $('#iv-name').innerHTML=`${f.name}<small>${f.sub}</small>`;
-    $('#s-intervene').classList.remove('fever-on');
+    $('#iv-pattern').textContent=`${P.label} · ${P.style}`;
+    const iv=$('#s-intervene'); iv.classList.remove('fever-on'); iv.classList.add('intro-on');
     $('#fever').classList.remove('show');
-    setPose('anchor'); updateIvGauges(f);
+    $('#ring-hub').className='ring-hub style-'+P.ringStyleKey;
+    updateIvGauges(f);
+    // step 1: character enters & settles (ring stays hidden until beats begin)
+    setPose('dash_land');
+    const pl=$('#iv-player'); pl.className='iv-player'; void pl.offsetWidth; pl.classList.add('enter');
+    $('#iv-hint').className='iv-hint'; $('#iv-hint').innerHTML='자세를 잡는다…';
+    syncDev();
+    showScreen('intervene');
+  }
+  function beginBeats(){
+    const iv=state.iv; if(!iv) return;
+    iv.phase='beat';
+    const sc=$('#s-intervene'); sc.classList.remove('intro-on');
+    const rh=$('#ring-hub'); rh.classList.remove('appear'); void rh.offsetWidth; rh.classList.add('appear');
     $('#iv-hint').className='iv-hint beat';
-    $('#iv-hint').innerHTML= beats>1 ? `<b>3연타</b> — 수렴마다 <b>탭</b>` : `수렴 순간에 <b>탭</b>해 막아라`;
-    showScreen('intervene'); startBeat();
+    $('#iv-hint').innerHTML= iv.beats>1 ? `<b>${iv.beats}연타</b> — 수렴마다 <b>탭</b>` : `수렴 순간에 <b>탭</b>해 막아라`;
+    startBeat();
   }
   function setPose(p){ $('#iv-player').src=`${A}player/player_guard_${p}.png`; }
   function updateIvGauges(f){
@@ -571,11 +564,11 @@
     $('#iv-th').style.width=f.threat+'%'; $('#iv-th-n').textContent=Math.round(f.threat);
   }
   function startBeat(){
-    const iv=state.iv; iv.t=0; iv.awaiting=true; iv.gap=0; iv.dur=feel.ringSpeed;
-    setPose('dash_land');
+    const iv=state.iv; iv.t=0; iv.awaiting=true; iv.gap=0; iv.dur=af().ringSpeed;
+    const pl=$('#iv-player'); pl.classList.remove('enter'); setPose('dash_land');
     $('#beat-count').textContent= iv.beats>1 ? `접점 ${iv.idx+1} / ${iv.beats}` : '';
     $('#ring-target').classList.remove('parryzone');
-    $('#beat-ring').className='beat-ring';
+    const br=$('#beat-ring'); br.classList.remove('danger');
   }
   function beatStep(dt){
     const iv=state.iv; if(!iv||iv.done) return;
@@ -584,15 +577,15 @@
     iv.t+=dt*1000/iv.dur;
     const dia=RING_START-(RING_START-RING_END)*iv.t;
     const br=$('#beat-ring'); br.style.width=dia+'px'; br.style.height=dia+'px';
-    br.classList.toggle('danger', dia>TARGET+feel.guardWindow);
-    $('#ring-target').classList.toggle('parryzone', Math.abs(dia-TARGET)<feel.parryWindow);
+    br.classList.toggle('danger', dia>TARGET+af().guardWindow);
+    $('#ring-target').classList.toggle('parryzone', Math.abs(dia-TARGET)<af().parryWindow);
     if(iv.t>=1.06) resolveBeat('miss');
   }
-  // whole-screen tap → route to judge or fever counter
   function onIvTap(){
     if(state.fever){ counterTap(); return; }
+    const iv=state.iv; if(!iv||iv.phase!=='beat') return;      // no judging during intro/result
     const now=performance.now();
-    if(now-lastTap < feel.inputCooldown) return;   // input lock (Dev)
+    if(now-lastTap < af().inputCooldown) return;
     lastTap=now;
     tapJudge();
   }
@@ -600,7 +593,7 @@
     const iv=state.iv; if(!iv||!iv.awaiting||iv.gap>0||iv.done) return;
     const dia=RING_START-(RING_START-RING_END)*iv.t;
     const err=Math.abs(dia-TARGET);
-    const out = err<feel.parryWindow?'parry' : (err<feel.guardWindow?'guard':'miss');
+    const out = err<af().parryWindow?'parry' : (err<af().guardWindow?'guard':'miss');
     resolveBeat(out);
   }
   function resolveBeat(out){
@@ -610,8 +603,8 @@
     else if(out==='guard'){ setPose('heavy_block'); fireFlash('guard-flash'); shake(false); brace(); callout('guard','GUARD','쿠웅!'); }
     else { setPose('miss_recover'); fireFlash('hit-flash'); shake(true); hurt(); callout('miss','MISS','—'); }
     iv.idx++;
-    if(iv.idx<iv.beats){ iv.gap=400+feel.hitstop; $('#beat-ring').style.width=RING_START+'px'; $('#beat-ring').style.height=RING_START+'px'; }
-    else { iv.done=true; setTimeout(finishIntervene, feel.poseHold); }
+    if(iv.idx<iv.beats){ iv.gap=af().interval+af().hitstop; $('#beat-ring').style.width=RING_START+'px'; $('#beat-ring').style.height=RING_START+'px'; }
+    else { iv.done=true; setTimeout(finishIntervene, af().poseHold); }
   }
   function aggregate(r){
     if(r.every(x=>x==='parry')) return r.length>1?'parry_perfect':'parry';
@@ -620,35 +613,42 @@
     if(r.includes('parry')&&miss===0) return 'parry';
     return 'guard';
   }
-  function finishIntervene(){
-    const iv=state.iv; const f=front(iv.frontId); const outcome=aggregate(iv.results);
-    if(outcome==='parry_perfect'){ fireFlash('finish-flash'); shake(true); callout('parry','PERFECT!','팜! 팜! 팜!');
-      f.threat=clamp(f.threat-48); f.hp=clamp(f.hp+14); state.omen=clamp(state.omen-12); }
+  // apply outcome to the SELECTED front ONLY (no other lane is touched, here or on return)
+  function applyOutcome(f,outcome){
+    if(outcome==='parry_perfect'){ f.threat=clamp(f.threat-48); f.hp=clamp(f.hp+14); state.omen=clamp(state.omen-12); }
     else if(outcome==='parry'){ f.threat=clamp(f.threat-34); f.hp=clamp(f.hp+7); state.omen=clamp(state.omen-8); }
     else if(outcome==='guard'){ f.threat=clamp(f.threat-16); f.hp=clamp(f.hp+1); state.omen=clamp(state.omen-3); }
     else { f.hp=clamp(f.hp-19); f.threat=clamp(f.threat+15); state.omen=clamp(state.omen+13); }
+  }
+  function showResultEmotion(outcome){
+    if(outcome==='parry_perfect'){ fireFlash('finish-flash'); setPose('victory_stand'); win(); emote('완벽하게 막아냈다!','win'); }
+    else if(outcome==='parry'){ setPose('victory_stand'); win(); emote('막아냈다!','win'); }
+    else if(outcome==='guard'){ setPose('heavy_block'); win(); emote('버텼다','win'); }
+    else { setPose('miss_recover'); shake(true); emote('아쉽다…','lose'); }
+  }
+  function finishIntervene(){
+    const iv=state.iv; const f=front(iv.frontId); const outcome=aggregate(iv.results);
+    applyOutcome(f,outcome);
     state.interveneCount++;
-    // PARRY → fever chance; Guard/Miss → straight back
-    if(outcome==='parry'||outcome==='parry_perfect'){ setTimeout(()=>enterFever(f,outcome), 240); }
-    else { setTimeout(()=>returnToObserve(f,outcome,0), 340); }
+    iv.phase='result';
+    showResultEmotion(outcome);                                   // hold result emotion IN the intervene layer
+    const feverOK=(iv.bossEvent||devForceFever)&&(outcome==='parry'||outcome==='parry_perfect');
+    setTimeout(()=>{ if(feverOK) enterFever(f,outcome); else returnToObserve(f,outcome,0); }, RESULT_HOLD);
   }
 
-  // ---------- Parry Fever ("나의 찬스다!") ----------
+  // ---------- Parry Fever (boss/event only; dev Force Fever for testing) ----------
   function enterFever(f,outcome){
-    const dur=(outcome==='parry_perfect'?feel.feverDuration*1.3:feel.feverDuration);
+    const dur=(outcome==='parry_perfect'?af().feverDuration*1.3:af().feverDuration);
     state.fever={ front:f, outcome, taps:0, dur, start:performance.now() };
     $('#fever-title').textContent = outcome==='parry_perfect' ? '나의 찬스다!!!!' : 'CHANCE!';
-    $('#fever-count').textContent='COUNTER 0';
-    $('#fever-bar').style.width='100%';
-    $('#fever').classList.add('show');
-    $('#s-intervene').classList.add('fever-on');
+    $('#fever-count').textContent='COUNTER 0'; $('#fever-bar').style.width='100%';
+    $('#fever').classList.add('show'); $('#s-intervene').classList.add('fever-on');
     $('#iv-hint').className='iv-hint beat'; $('#iv-hint').innerHTML='<b>탭! 탭! 탭!</b>';
     setPose('parry_release'); $('#iv-player').classList.add('fever');
   }
   function counterTap(){
     const fv=state.fever; if(!fv) return;
-    fv.taps++;
-    $('#fever-count').textContent='COUNTER '+fv.taps;
+    fv.taps++; $('#fever-count').textContent='COUNTER '+fv.taps;
     const p=$('#iv-player'); p.classList.remove('swing'); void p.offsetWidth; p.classList.add('swing');
     if(fv.taps%4===0){ fireFlash('parry-flash'); shake(false); }
   }
@@ -661,12 +661,10 @@
   function endFever(){
     const fv=state.fever; if(!fv) return;
     const f=fv.front, taps=fv.taps;
-    const per=(fv.outcome==='parry_perfect'?2.4:2.0);
-    f.threat=clamp(f.threat - Math.min(taps,20)*per);   // extra threat cut, capped
+    f.threat=clamp(f.threat - Math.min(taps,20)*(fv.outcome==='parry_perfect'?2.4:2.0));
     state.omen=clamp(state.omen - taps*0.3);
     $('#iv-player').classList.remove('fever','swing');
-    $('#fever').classList.remove('show');
-    $('#s-intervene').classList.remove('fever-on');
+    $('#fever').classList.remove('show'); $('#s-intervene').classList.remove('fever-on');
     state.fever=null;
     returnToObserve(f, fv.outcome, taps);
   }
@@ -674,35 +672,35 @@
   function returnToObserve(f, outcome, counterTaps){
     showScreen('observe'); state.screen='observe'; state.selectedId=null;
     state.fronts.forEach(renderLane); renderTop();
-    laneBurst(f.id, outcome, counterTaps);
+    laneBurst(f.id, outcome, counterTaps);      // ONLY this lane reacts
     state.iv=null;
     if(!state.omenDone && state.interveneCount>=3) triggerOmen();
   }
 
   // ---------- FX ----------
   function callout(k,big,sm){ const c=$('#iv-callout'); c.className='iv-callout '+k; c.innerHTML=`${big}<small>${sm}</small>`; void c.offsetWidth; c.classList.add('pop'); }
+  function emote(txt,k){ const e=$('#iv-emote'); e.className='iv-emote '+k; e.textContent=txt; void e.offsetWidth; e.classList.add('pop'); }
   function fireFlash(cls){ const fl=$('#iv-flash'); fl.className='flash '+cls; void fl.offsetWidth; fl.classList.add('fire'); }
-  function shake(hard){ const st=$('#stage'); st.style.setProperty('--shk', feel.screenShake);
-    st.classList.remove('shake','shake-hard'); if(feel.screenShake<=0) return; void st.offsetWidth; st.classList.add(hard?'shake-hard':'shake'); }
-  function brace(){ const p=$('#iv-player'); p.classList.remove('brace'); void p.offsetWidth; p.classList.add('brace'); }
+  function shake(hard){ const st=$('#stage'); st.style.setProperty('--shk', af().screenShake);
+    st.classList.remove('shake','shake-hard'); if(af().screenShake<=0) return; void st.offsetWidth; st.classList.add(hard?'shake-hard':'shake'); }
+  function brace(){ const p=$('#iv-player'); p.classList.remove('brace','win'); void p.offsetWidth; p.classList.add('brace'); }
   function hurt(){ const p=$('#iv-player'); p.classList.remove('hurt'); void p.offsetWidth; p.classList.add('hurt'); }
+  function win(){ const p=$('#iv-player'); p.classList.remove('win','brace'); void p.offsetWidth; p.classList.add('win'); }
   function laneBurst(id,outcome,counterTaps){
     const e=laneEls[id]; if(!e) return;
     let cls,txt;
     if(counterTaps&&counterTaps>0){ cls='parry'; txt=`COUNTER × ${counterTaps}`; }
-    else { const map={parry:['parry','PARRY ✦'],parry_perfect:['parry','PERFECT ✦'],guard:['guard','GUARD'],miss:['miss','MISS']};
-      [cls,txt]=map[outcome]||map.guard; }
+    else { const map={parry:['parry','PARRY ✦'],parry_perfect:['parry','PERFECT ✦'],guard:['guard','GUARD'],miss:['miss','MISS']}; [cls,txt]=map[outcome]||map.guard; }
     e.burst.className='lane-burst '+cls; e.burstB.textContent=txt; void e.burst.offsetWidth; e.burst.classList.add('show');
     if(outcome==='miss'){ e.root.classList.remove('shakeit'); void e.root.offsetWidth; e.root.classList.add('shakeit'); }
     else if(e.foeFront){ e.foeFront.classList.remove('hitflash'); void e.foeFront.offsetWidth; e.foeFront.classList.add('hitflash'); }
   }
 
-  // ---------- boss omen ----------
   function triggerOmen(){
     if(state.omenDone) return;
     state.omenDone=true; state.omen=100;
     if(state.screen==='observe') renderTop();
-    $('#stage').style.setProperty('--shk', feel.screenShake); $('#stage').classList.add('shake-hard');
+    $('#stage').style.setProperty('--shk', 1.0); $('#stage').classList.add('shake-hard');
     Object.values(laneEls).forEach(e=>e.root.classList.add('shakeit'));
     setTimeout(()=>$('#omen-overlay').classList.add('show'),240);
   }
@@ -712,7 +710,6 @@
     $('.fab-wrap').style.display = name==='title' ? 'none' : 'flex';
     if(name==='title') closeDev();
   }
-
   function startGame(){
     state.fronts=freshFronts();
     state.selectedId=null; state.interveneCount=0; state.omen=0; state.omenDone=false; state.iv=null; state.fever=null;
@@ -720,29 +717,41 @@
     $('#omen-overlay').classList.remove('show');
     state.screen='observe'; showScreen('observe');
   }
-  function fullReset(){ $('#omen-overlay').classList.remove('show'); state.fever=null; state.iv=null; state.screen='title'; showScreen('title'); }
+  function fullReset(){ $('#omen-overlay').classList.remove('show'); state.fever=null; state.iv=null;
+    $('#s-intervene').classList.remove('intro-on','fever-on'); state.screen='title'; showScreen('title'); }
 
-  // ---------- Dev panel ----------
+  // ---------- Dev panel (edits the ACTIVE pattern; presets read-only) ----------
+  function fmtFeel(o,v){ return (o.step<1?Number(v).toFixed(2):Math.round(v))+o.u; }
   function buildDev(){
     const wrap=$('#dev-rows'); wrap.innerHTML='';
     DEV_OPTS.forEach(o=>{
       const row=document.createElement('div'); row.className='dev-row';
       row.innerHTML=`<div class="dr-top"><span>${o.label}</span><em id="dv-${o.key}"></em></div>
-        <input type="range" id="dr-${o.key}" min="${o.min}" max="${o.max}" step="${o.step}">
-        <div class="dr-note">${o.note}</div>`;
+        <input type="range" id="dr-${o.key}" min="${o.min}" max="${o.max}" step="${o.step}">`;
       wrap.appendChild(row);
       const inp=row.querySelector('input');
-      inp.value=feel[o.key];
-      row.querySelector('em').textContent=fmtFeel(o,feel[o.key]);
-      inp.addEventListener('input',()=>{ feel[o.key]=Number(inp.value); row.querySelector('em').textContent=fmtFeel(o,feel[o.key]);
-        if(o.key==='screenShake') $('#stage').style.setProperty('--shk',feel.screenShake); });
+      inp.addEventListener('input',()=>{ af()[o.key]=Number(inp.value); $('#dv-'+o.key).textContent=fmtFeel(o,af()[o.key]);
+        if(o.key==='screenShake') $('#stage').style.setProperty('--shk',af().screenShake); renderPresets(); });
     });
+    syncDev();
   }
-  function fmtFeel(o,v){ return (o.dp?Number(v).toFixed(o.dp):Math.round(v))+(o.key==='screenShake'?'×':(o.key==='parryWindow'||o.key==='guardWindow'?'px':'ms')); }
-  function syncDev(){ DEV_OPTS.forEach(o=>{ const inp=$('#dr-'+o.key); if(inp){ inp.value=feel[o.key]; $('#dv-'+o.key).textContent=fmtFeel(o,feel[o.key]); } }); }
+  function syncDev(){
+    const P=af();
+    $('#dev-pat').textContent=P.label;
+    $('#dev-pat-style').textContent=`${P.style} · ×${P.hitCount} · intro ${P.introDelay}ms · gap ${P.interval}ms`;
+    DEV_OPTS.forEach(o=>{ const inp=$('#dr-'+o.key); if(inp){ inp.value=P[o.key]; $('#dv-'+o.key).textContent=fmtFeel(o,P[o.key]); } });
+    renderPresets();
+  }
+  function renderPresets(){
+    $('#dev-presets').innerHTML='<div class="dp-h">PATTERN PRESETS</div>'+['ogre','goblin','orc_mage'].map(k=>{
+      const p=PATTERN_PROFILES[k]; const on=state.activeKey===k?' on':'';
+      return `<div class="dp-row${on}"><b>${p.label}</b><span>${p.ringSpeed}ms · ×${p.hitCount} · P${p.parryWindow}/G${p.guardWindow} · shk${Number(p.screenShake).toFixed(2)}</span></div>`;
+    }).join('');
+  }
   function openDev(){ $('#dev-panel').classList.add('show'); }
   function closeDev(){ $('#dev-panel').classList.remove('show'); }
-  function resetFeel(){ Object.assign(feel, FEEL_DEFAULTS); $('#stage').style.setProperty('--shk',feel.screenShake); syncDev(); }
+  function resetFeel(){ ['ogre','goblin','orc_mage'].forEach(k=>Object.assign(PATTERN_PROFILES[k],deep(PATTERN_DEFAULTS[k])));
+    $('#stage').style.setProperty('--shk',af().screenShake); syncDev(); }
 
   // ---------- wire ----------
   $('#s-title').addEventListener('click', startGame);
@@ -753,19 +762,21 @@
   $('#fab-dev').addEventListener('click', (e)=>{ e.stopPropagation(); $('#dev-panel').classList.toggle('show'); });
   $('#dev-close').addEventListener('click', (e)=>{ e.stopPropagation(); closeDev(); });
   $('#dev-reset').addEventListener('click', (e)=>{ e.stopPropagation(); resetFeel(); });
+  $('#dev-fever').addEventListener('change', (e)=>{ devForceFever=e.target.checked; });
   $('#dev-panel').addEventListener('click', e=>e.stopPropagation());
 
   buildDev();
-  $('#stage').style.setProperty('--shk', feel.screenShake);
+  $('#stage').style.setProperty('--shk', af().screenShake);
 
-  // dev/inspection hook (no gameplay change; used for smoke verification)
-  window.__QV={ state, front, feel, enterIntervene, resetFeel,
-    setFeel(k,v){ feel[k]=v; syncDev(); if(k==='screenShake') $('#stage').style.setProperty('--shk',v); },
-    forceBeat(errPx){ const iv=state.iv; if(!iv) return 'no-iv';
+  window.__QV={ state, front, PATTERN_PROFILES, PATTERN_DEFAULTS,
+    get activeKey(){return state.activeKey;}, get devForceFever(){return devForceFever;},
+    setForceFever(v){ devForceFever=!!v; $('#dev-fever').checked=devForceFever; },
+    resetFeel, af,
+    enterIntervene, skipIntro(){ if(state.iv&&state.iv.phase==='intro'){ state.iv.introLeft=0; beginBeats(); } },
+    forceBeat(errPx){ const iv=state.iv; if(!iv) return 'no-iv'; if(iv.phase==='intro') this.skipIntro();
       const dia=TARGET+(errPx||0); iv.t=(RING_START-dia)/(RING_START-RING_END); iv.awaiting=true; iv.gap=0;
-      tapJudge(); return {results:iv.results.slice(), idx:iv.idx, done:iv.done}; },
-    feverTap(){ counterTap(); return state.fever?state.fever.taps:null; },
-    endFever };
+      tapJudge(); return {results:iv.results.slice(), idx:iv.idx, done:iv.done, phase:iv.phase}; },
+    feverTap(){ counterTap(); return state.fever?state.fever.taps:null; }, endFever };
 
   requestAnimationFrame(loop);
 })();
