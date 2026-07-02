@@ -26,6 +26,10 @@
   **2.5D 전장 배치**(앞 크게·낮게 / 뒤 작게·높게, 캐릭터가 하단 게이지 위로 — 평평한 일렬 제거),
   **개입 인트로 호흡**(캐릭터 등장·안착 → 링 등장 → 판정 시작), **결과 감정 연출**(성공=승리 포즈 "막아냈다!" /
   실패=miss recover "아쉬다…") 후 복귀, 결과·burst는 선택 전선에만, 아군/몬스터 스프라이트 활용 확대.
+- **01E (Feel Tuning Recorder)**: 손맛을 바꾸지 않고 **기록**하는 패스. FEEL DEV에 FEEL RECORDER 섹션 —
+  📋 Copy Current/Copy All(텍스트 프리셋 클립보드 복사), 💾 Save/📂 Load(3패턴 작업값 localStorage 임시 저장,
+  key `gsqv01_feel_working`), ★ "이 값 좋음" 스냅샷(활성 패턴 값 저장, key `gsqv01_feel_snapshots`, 최대 12개,
+  목록에서 적용/삭제). Reset Feel Defaults는 메모리만 기본값 복원(저장분 보존). 패턴 기본값·게임 동작 무변경.
 
 ## 폴더 구조
 

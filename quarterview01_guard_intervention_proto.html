@@ -252,6 +252,26 @@
   .dev-presets .dp-row.on{color:var(--cyan-hot);}
   .dev-presets .dp-row.on b{color:var(--cyan-hot);}
   .dev-reset{width:calc(100% - 22px);margin:2px 11px 11px;padding:9px;border:none;border-radius:9px;font-size:11px;font-weight:800;letter-spacing:.1em;color:#22190a;cursor:pointer;background:linear-gradient(180deg,#f7e4a4,#e7c15a);}
+  /* 01E: feel tuning recorder (copy / save / snapshots) */
+  .dev-rec{border-top:1px solid rgba(90,110,160,.3);padding-top:8px;margin-bottom:8px;}
+  .dev-rec .dp-h{font-size:8.5px;letter-spacing:.16em;color:#6f7a96;font-weight:800;margin-bottom:6px;}
+  .dev-rec-btns{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px;}
+  .dev-rec-btns button{flex:1 1 45%;min-height:30px;padding:6px 4px;border:1px solid rgba(90,110,160,.5);border-radius:7px;
+    background:rgba(28,36,58,.85);color:#cfe8ff;font-size:9.5px;font-weight:800;letter-spacing:.04em;cursor:pointer;}
+  .dev-rec-btns button:active{transform:scale(.96);}
+  .dev-snap-add{width:100%;min-height:32px;margin-bottom:7px;padding:7px;border:1px solid rgba(231,193,90,.5);border-radius:7px;
+    background:rgba(90,70,20,.35);color:#ffe1a8;font-size:10px;font-weight:800;letter-spacing:.06em;cursor:pointer;}
+  .dev-snap-add:active{transform:scale(.97);}
+  .snap-row{display:flex;align-items:center;gap:5px;margin-bottom:4px;font-size:8.5px;color:#c7cfe4;}
+  .snap-row .sn-label{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;}
+  .snap-row .sn-label b{color:var(--cyan-hot);}
+  .snap-row button{flex:0 0 auto;min-height:26px;padding:4px 8px;border:1px solid rgba(90,110,160,.5);border-radius:6px;
+    background:rgba(28,36,58,.85);color:#cfe8ff;font-size:8.5px;font-weight:800;cursor:pointer;}
+  .snap-row button.sn-del{color:#ff9a8e;border-color:rgba(229,71,63,.4);}
+  .snap-empty{font-size:8.5px;color:#6f7a96;margin-bottom:4px;}
+  .dev-msg{min-height:13px;font-size:9px;font-weight:800;color:var(--cyan-hot);text-align:center;margin-bottom:4px;
+    opacity:0;transition:opacity .2s;}
+  .dev-msg.show{opacity:1;}
 </style>
 </head>
 <body>
@@ -338,6 +358,18 @@
       <div class="dev-pattern">PATTERN: <em id="dev-pat">—</em><span id="dev-pat-style"></span></div>
       <div id="dev-rows"></div>
       <div class="dev-toggle"><label><input type="checkbox" id="dev-fever"> Force Fever Test <span style="color:#6f7a96">(일반전 피버 확인)</span></label></div>
+      <div class="dev-rec">
+        <div class="dp-h">FEEL RECORDER</div>
+        <div class="dev-msg" id="dev-msg"></div>
+        <div class="dev-rec-btns">
+          <button id="dev-copy">📋 Copy Current</button>
+          <button id="dev-copy-all">📋 Copy All</button>
+          <button id="dev-save">💾 Save (임시)</button>
+          <button id="dev-load">📂 Load</button>
+        </div>
+        <button class="dev-snap-add" id="dev-snap-add">★ 이 값 좋음 — 스냅샷 저장</button>
+        <div id="snap-list"></div>
+      </div>
       <div class="dev-presets" id="dev-presets"></div>
     </div>
     <button class="dev-reset" id="dev-reset">Reset Feel Defaults</button>
@@ -753,6 +785,64 @@
   function resetFeel(){ ['ogre','goblin','orc_mage'].forEach(k=>Object.assign(PATTERN_PROFILES[k],deep(PATTERN_DEFAULTS[k])));
     $('#stage').style.setProperty('--shk',af().screenShake); syncDev(); }
 
+  // ---- 01E: feel tuning recorder (copy / temp save / snapshots) — records feel, never changes gameplay ----
+  const LS_WORK='gsqv01_feel_working', LS_SNAPS='gsqv01_feel_snapshots';
+  const REC_KEYS=['ringSpeed','parryWindow','guardWindow','poseHold','hitstop','inputCooldown','screenShake','feverDuration','hitCount','interval','introDelay'];
+  function devMsg(t){ const m=$('#dev-msg'); m.textContent=t; m.classList.add('show');
+    clearTimeout(devMsg._t); devMsg._t=setTimeout(()=>m.classList.remove('show'),1600); }
+  function presetText(k){
+    const p=PATTERN_PROFILES[k];
+    return `[Guard Seed Feel Preset]\nPattern: ${p.label} ${p.style.split(' ')[0]}\nringSpeed: ${p.ringSpeed}\nparryWindow: ${p.parryWindow}\nguardWindow: ${p.guardWindow}\nposeHold: ${p.poseHold}\nhitstop: ${p.hitstop}\ninputLock: ${p.inputCooldown}\nscreenShake: ${Number(p.screenShake).toFixed(2)}\nhitCount: ${p.hitCount}\ninterval: ${p.interval}\nintroDelay: ${p.introDelay}\nfeverDuration: ${p.feverDuration}`;
+  }
+  function fallbackCopy(t,done){
+    try{ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); }
+    catch(e){ devMsg('복사 실패'); }
+  }
+  function copyText(t,okMsg){
+    const done=()=>devMsg(okMsg||'복사됨!');
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(done).catch(()=>fallbackCopy(t,done)); }
+    else fallbackCopy(t,done);
+  }
+  function lsGet(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }
+  function pickVals(p){ const o={}; REC_KEYS.forEach(k=>o[k]=p[k]); return o; }
+  function saveWorking(){
+    const data={}; ['ogre','goblin','orc_mage'].forEach(k=>data[k]=pickVals(PATTERN_PROFILES[k]));
+    devMsg(lsSet(LS_WORK,data)?'3패턴 저장됨 (임시)':'저장 실패');
+  }
+  function loadWorking(){
+    const data=lsGet(LS_WORK);
+    if(!data){ devMsg('저장된 값 없음'); return; }
+    ['ogre','goblin','orc_mage'].forEach(k=>{ if(data[k]) REC_KEYS.forEach(f=>{ if(typeof data[k][f]==='number') PATTERN_PROFILES[k][f]=data[k][f]; }); });
+    $('#stage').style.setProperty('--shk',af().screenShake); syncDev(); devMsg('불러옴');
+  }
+  const getSnaps=()=>lsGet(LS_SNAPS)||[];
+  function addSnap(){
+    const k=state.activeKey, p=PATTERN_PROFILES[k];
+    const snaps=getSnaps();
+    snaps.unshift({ t:Date.now(), key:k, label:p.label, vals:pickVals(p) });
+    while(snaps.length>12) snaps.pop();
+    devMsg(lsSet(LS_SNAPS,snaps)?'스냅샷 저장! ★':'저장 실패');
+    renderSnaps();
+  }
+  function applySnap(i){
+    const s=getSnaps()[i]; if(!s||!PATTERN_PROFILES[s.key]) return;
+    REC_KEYS.forEach(f=>{ if(typeof s.vals[f]==='number') PATTERN_PROFILES[s.key][f]=s.vals[f]; });
+    state.activeKey=s.key;   // show the applied pattern in the panel (re-entering a lane re-picks its own pattern)
+    $('#stage').style.setProperty('--shk',af().screenShake); syncDev(); devMsg(s.label+' 스냅샷 적용됨');
+  }
+  function delSnap(i){ const snaps=getSnaps(); snaps.splice(i,1); lsSet(LS_SNAPS,snaps); renderSnaps(); }
+  function fmtTime(t){ const d=new Date(t); const p=n=>String(n).padStart(2,'0');
+    return `${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
+  function renderSnaps(){
+    const list=$('#snap-list'); const snaps=getSnaps();
+    if(!snaps.length){ list.innerHTML='<div class="snap-empty">저장된 스냅샷 없음</div>'; return; }
+    list.innerHTML=snaps.map((s,i)=>
+      `<div class="snap-row"><span class="sn-label"><b>${s.label}</b> ${s.vals.ringSpeed}ms·P${s.vals.parryWindow}/G${s.vals.guardWindow} · ${fmtTime(s.t)}</span>`+
+      `<button data-snap-apply="${i}">적용</button><button class="sn-del" data-snap-del="${i}">✕</button></div>`).join('');
+  }
+
   // ---------- wire ----------
   $('#s-title').addEventListener('click', startGame);
   $('#s-intervene').addEventListener('click', onIvTap);
@@ -764,14 +854,26 @@
   $('#dev-reset').addEventListener('click', (e)=>{ e.stopPropagation(); resetFeel(); });
   $('#dev-fever').addEventListener('change', (e)=>{ devForceFever=e.target.checked; });
   $('#dev-panel').addEventListener('click', e=>e.stopPropagation());
+  // 01E recorder wiring
+  $('#dev-copy').addEventListener('click', ()=>copyText(presetText(state.activeKey),'현재 패턴 복사됨!'));
+  $('#dev-copy-all').addEventListener('click', ()=>copyText(['ogre','goblin','orc_mage'].map(presetText).join('\n\n'),'전체 패턴 복사됨!'));
+  $('#dev-save').addEventListener('click', saveWorking);
+  $('#dev-load').addEventListener('click', loadWorking);
+  $('#dev-snap-add').addEventListener('click', addSnap);
+  $('#snap-list').addEventListener('click', (e)=>{
+    const a=e.target.getAttribute('data-snap-apply'), d=e.target.getAttribute('data-snap-del');
+    if(a!==null) applySnap(Number(a)); else if(d!==null) delSnap(Number(d));
+  });
 
   buildDev();
+  renderSnaps();
   $('#stage').style.setProperty('--shk', af().screenShake);
 
   window.__QV={ state, front, PATTERN_PROFILES, PATTERN_DEFAULTS,
     get activeKey(){return state.activeKey;}, get devForceFever(){return devForceFever;},
     setForceFever(v){ devForceFever=!!v; $('#dev-fever').checked=devForceFever; },
     resetFeel, af,
+    presetText, saveWorking, loadWorking, addSnap, applySnap, getSnaps, LS_WORK, LS_SNAPS,
     enterIntervene, skipIntro(){ if(state.iv&&state.iv.phase==='intro'){ state.iv.introLeft=0; beginBeats(); } },
     forceBeat(errPx){ const iv=state.iv; if(!iv) return 'no-iv'; if(iv.phase==='intro') this.skipIntro();
       const dia=TARGET+(errPx||0); iv.t=(RING_START-dia)/(RING_START-RING_END); iv.awaiting=true; iv.gap=0;
